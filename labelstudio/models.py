@@ -3,16 +3,16 @@ from pydantic import BaseModel, Field, model_validator
 
 Cut = Literal['full', 'half', 'none']
 KINDS = ['general', 'cable-flag', 'cable-wrap', 'patch-panel', 'faceplate', 'die-cut-flag', 'terminal-block', 'heat-shrink']
-TAPE = {3.5: (24, 0), 6: (32, 48), 9: (50, 39), 12: (70, 29), 18: (112, 8), 24: (128, 0)}
+TAPE = {3.5: (24, 52), 6: (32, 48), 9: (50, 39), 12: (70, 29), 18: (112, 8), 24: (128, 0)}
 
 
 class Element(BaseModel):
     id: str = 'text1'
     type: Literal['text', 'image', 'line', 'rectangle', 'qr', 'barcode'] = 'text'
     x: float = Field(2, ge=0, le=1000)
-    y: float = Field(3.5, ge=0, le=24)
+    y: float = Field(3.5, ge=0, le=102)
     w: float = Field(0, ge=0, le=1000)
-    h: float = Field(6, gt=0, le=24)
+    h: float = Field(6, gt=0, le=102)
     text: str = Field('DC-{Rack}-{Port}', max_length=8000)
     font: str = 'Segoe UI'
     size: float = Field(12, ge=3, le=96)
@@ -26,6 +26,7 @@ class Element(BaseModel):
 
 
 class Label(BaseModel):
+    model: str = 'PT-E550W'
     name: str = Field('Untitled', max_length=200)
     kind: Literal['general', 'cable-flag', 'cable-wrap', 'patch-panel', 'faceplate', 'die-cut-flag', 'terminal-block', 'heat-shrink'] = 'general'
     width: float = 24
@@ -47,7 +48,8 @@ class Label(BaseModel):
 
     @model_validator(mode='after')
     def valid_tape(self):
-        if self.width not in TAPE:
+        from .profiles import get_profile
+        if self.width not in get_profile(self.model)['widths']:
             raise ValueError('UNSUPPORTED_TAPE_WIDTH')
         return self
 
@@ -60,6 +62,13 @@ class Document(BaseModel):
 
 
 class Settings(BaseModel):
+    model: str = 'PT-E550W'
+    wifi_mode: Literal['infrastructure','direct'] = 'infrastructure'
+    hostname: str = Field('',max_length=253,pattern=r'^[a-zA-Z0-9_.-]*$')
+    mac: str = ''
+    auto_ip: bool = False
+    discovery_subnet: str = ''
+    update_prerelease: bool = False
     connection: Literal['usb', 'wifi'] = 'usb'
     printer: str = ''
     ip: str = ''
@@ -79,8 +88,21 @@ class Settings(BaseModel):
 
     @model_validator(mode='after')
     def validate(self):
-        if self.default_width not in TAPE:
+        from .profiles import get_profile
+        if self.default_width not in get_profile(self.model)['widths']:
             raise ValueError('UNSUPPORTED_TAPE_WIDTH')
+        if self.connection=='wifi' and get_profile(self.model)['transport']=='raster' and not get_profile(self.model)['wifi']:
+            raise ValueError('WIFI_NOT_SUPPORTED_BY_MODEL')
+        if self.auto_ip and not self.mac:
+            raise ValueError('MAC_REQUIRED_FOR_AUTO_IP')
+        if self.mac:
+            from .discovery import normalize_mac
+            self.mac=normalize_mac(self.mac)
+        if self.discovery_subnet:
+            import ipaddress
+            net=ipaddress.ip_network(self.discovery_subnet,strict=False)
+            if net.version!=4 or net.num_addresses>1024 or not net.is_private:
+                raise ValueError('SELECT_LOCAL_SUBNET_MAX_1024')
         if self.ip:
             import ipaddress
             ipaddress.ip_address(self.ip)
@@ -95,6 +117,12 @@ class ResourceIn(BaseModel):
 
 
 class PrintRequest(BaseModel):
+    source: str | None = None
+    sheets: list[str] | None = None
+    encoding: str = 'utf-8-sig'
+    delimiter: str | None = None
+    record_from: int = Field(0,ge=0)
+    record_to: int | None = Field(None,ge=1)
     documents: list[Document] = Field(min_length=1, max_length=100)
     records: list[dict] = Field(default_factory=lambda: [{}], min_length=1, max_length=100000)
     copies: int = Field(1, ge=1, le=10000)

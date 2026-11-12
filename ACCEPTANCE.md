@@ -1,4 +1,4 @@
-# Requirements and verification — Cable Label Studio 1.0.0
+# Requirements and verification — Cable Label Studio 1.1.0
 
 Prepared 2026-11-13 (Asia/Tehran). **Software implementation and hardware acceptance are separate.** The build machine has only Microsoft Print to PDF, no installed Brother PT-E550W driver, no attached PT-E550W and no Microsoft Access ODBC driver. Those missing devices/drivers are reported by the application, not replaced by a success indicator.
 
@@ -41,14 +41,14 @@ The user's repeated numbering is retained where useful. “Implemented” means 
 | 32. Continuous/key-confirmed | Serial queue, Enter/Space or Next record gate | Automated gate/cancel test and browser 3-record simulation |
 | 33. Label formats | General, cable flag/wrap, patch panel, faceplate, die-cut flag layout, terminal block | Die-cut is layout on continuous tape, not shaped cutting; optional heat-shrink is simulation only |
 | 34. Usage reports | Per user/date, requested/submitted/confirmed/simulated/failure/cancel/interruption | Simulation never counted as submission; true device-confirmed count stays separate |
-| 35. Install/repair/uninstall/update | Installer modes; Start menu maintenance; rollback on copy failure | User data preserved; manual update by newer installer |
+| 35. Install/repair/uninstall/update | Installer modes; Start menu maintenance; rollback on copy failure | User data preserved; offline installer and online GitHub update helper |
 | 36. Custom install path | Dedicated empty or recognized product folder | Refuses unrelated nonempty destination; safe extraction paths |
 
 ## Verification artifacts
 
 - `tests/test_core.py`: formulas, bilingual text, dimensions, seed layouts, raster protocol, data import, auth/access, CSRF/origin, full preflight, queue gates/cancel, simulation counters, uploads/backup and loopback transport.
 - `tests/verify_installer.py`: isolated install, executable health, file repair, update, uninstall, SHA manifest checks and unrelated-file preservation. No physical print is issued.
-- `verification/`: public test summaries and a screenshot. Raw logs and machine-specific test directories remain local and are not published.
+- `verification/`: public summaries/screenshots; raw logs and machine-specific test directories remain local.
 - `release/SHA256SUMS.txt`: release installer and portable-package checksums.
 
 The native setup window exposed its Persian text, operation selector, path selector and wizard actions through accessibility inspection. Native desktop screenshot/input capture was unavailable on this host (`CreateForMonitor` / `GetCursorPos` access errors); its graphical appearance was not screenshot-verified. The installer engine itself was exercised through all four modes. Browser screenshots and interactions were available for the web interface, including desktop and narrow-window layouts.
@@ -60,3 +60,17 @@ Connect the user's PT-E550W; install its official driver for USB and configure i
 The package is not represented as physically certified. Windows spool success and TCP send success are submission acknowledgements. This E550W transport does not provide a reliable per-label completion counter; `confirmed` remains zero without such evidence. Cancelling cannot recall data already submitted to the OS/printer. No automatic resend is performed after failure or process interruption.
 
 The supplied executable is unsigned; no code-signing identity was available. Native P-touch `.lbx` import/export, remote-LAN hosting, and printer firmware/network reconfiguration were not requested as supported deliverables and are not implemented.
+
+
+## Release 1.1.0 implementation and validation
+
+- Creator Amir Rahimi, free MIT license, GitHub project links in setup/sidebar/all views/login, and the bilingual repository description.
+- First wizard screen contains only the language question in three languages and three buttons before mode/path selection. Native build succeeds; desktop capture/input is blocked by host access errors, so graphical/picker acceptance is pending.
+- Multi-sheet import and a native Windows file picker-backed live source. An integration test changes the actual workbook on disk and verifies fresh preview and a three-record print snapshot without upload. Cancel, missing-path and aggregate-sheet semantics are checked.
+- Local-link bounded IPv4 discovery, exact Wi-Fi MAC matching, fresh resolution before job start, DNS hostname support and stale-identity blocking. PnP fixture proves model identification without a loaded driver. SNMP transaction/identity and unreachable unknown states are tested. No remote scan substitutes for actual printer acceptance.
+- GitHub Releases version comparison, stable/prerelease filtering, persistent progress/log/errors, SHA-256 verification, database backup and a native helper that installs/restarts after stopping the app. Hash failure prevents installation. Package updates preserve user data; portable updates do not register a new global installation.
+- E550W/P750W/P710BT Raster profiles; P700/P900W/P950NW/QL-800/810W/820NWB Windows GDI driver profiles. Dimensions/qualities and unsupported cut/transport rejection are tested. Driver private properties control physical media/quality/cuts; app cut policies apply to native Raster profiles. Generic Brother driver support requires operator validation.
+- Official Brother model download pages and HTTPS direct-file downloads with progress/errors and computed SHA-256. Vendor HTML pages are rejected as executable downloads. No unsigned third-party driver mirror is used.
+- Separate Direct/Infrastructure setup guides and Windows Wi-Fi settings action. Password entry and wireless association remain in the printer/Windows UI.
+
+The 1.1.0 software suite includes 63 existing and 27 new cases (90 passed). Windows package checks cover 17 install/runtime/repair/update/uninstall cases, plus the real per-user registration/shortcut and native update-handoff checks recorded in the public release summary. Browser inspection covers the three locales, multi-sheet selection and update/connection screens. Public summaries contain no runtime paths or raw logs.

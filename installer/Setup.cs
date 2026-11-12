@@ -17,7 +17,9 @@ using Microsoft.Win32;
 
 [assembly: AssemblyTitle("Cable Label Studio Setup")]
 [assembly: AssemblyProduct("Cable Label Studio")]
-[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyCompany("Amir Rahimi")]
+[assembly: AssemblyCopyright("Copyright 2026 Amir Rahimi - MIT License")]
+[assembly: AssemblyVersion("1.1.0.0")]
 
 public class PackageManifest {
     public string product {get;set;}
@@ -115,7 +117,7 @@ public class Engine {
         string app=Path.Combine(target,Program.Exe);
         if(!File.Exists(app))return;
         Log("Stopping installed application...");
-        using(var process=Process.Start(new ProcessStartInfo(app,"--stop"){UseShellExecute=false,CreateNoWindow=true,WindowStyle=ProcessWindowStyle.Hidden}))process.WaitForExit(10000);
+        using(var process=Process.Start(new ProcessStartInfo(app,"--stop"+(Program.Args.ContainsKey("data-dir")?" --data-dir "+Program.Quote(Program.Get("data-dir","")):"")){UseShellExecute=false,CreateNoWindow=true,WindowStyle=ProcessWindowStyle.Hidden}))process.WaitForExit(10000);
         for(int i=0;i<50;i++){
             bool running=false;
             foreach(var p in Process.GetProcessesByName("CableLabelStudio")){
@@ -133,7 +135,7 @@ public class Engine {
         PackageManifest old=Manifest(target);
         if(Directory.Exists(target) && Directory.EnumerateFileSystemEntries(target).Any() && old==null)throw new IOException("The destination contains unrelated files. Choose an empty folder.");
         if(mode=="uninstall"||mode=="repair")if(old==null)throw new IOException("No installation was found in this folder.");
-        Log("Cable Label Studio 1.0.0 · "+mode);Log("Destination: "+target);Log("Data is preserved in LocalAppData\\CableLabelStudio.");Progress(2);
+        Log("Cable Label Studio 1.1.0 · "+mode);Log("Destination: "+target);Log("Data is preserved in LocalAppData\\CableLabelStudio.");Progress(2);
         StopApp();
         if(mode=="uninstall"){
             int index=0;
@@ -224,7 +226,7 @@ public class Engine {
         }
     }
     void Register(){using(var key=Registry.CurrentUser.CreateSubKey(Program.RegPath)){
-        key.SetValue("DisplayName","Cable Label Studio");key.SetValue("DisplayVersion","1.0.0");key.SetValue("Publisher","Cable Label Studio");key.SetValue("InstallLocation",target);
+        key.SetValue("DisplayName","Cable Label Studio");key.SetValue("DisplayVersion","1.1.0");key.SetValue("Publisher","Amir Rahimi");key.SetValue("URLInfoAbout","https://github.com/aa70027/P-touch");key.SetValue("InstallLocation",target);
         key.SetValue("DisplayIcon",Path.Combine(target,Program.Exe));
         string setup=Program.Quote(Path.Combine(target,"CableLabelStudio-Setup.exe"));
         key.SetValue("UninstallString",setup+" /mode uninstall /dir "+Program.Quote(target));
@@ -270,7 +272,7 @@ public class Engine {
 
 public class Wizard:Form {
     Color dark=Color.FromArgb(16,45,53),teal=Color.FromArgb(18,121,111),ink=Color.FromArgb(30,61,61);
-    Panel side,body;Label title,subtitle,steps;ComboBox language,mode;TextBox path;Button browse,next,back;CheckBox launch;RichTextBox log;ProgressBar progress;int stage=0;string initialMode;
+    Panel side,body;Label title,subtitle,steps;ComboBox language,mode;TextBox path;Button browse,next,back;CheckBox launch;RichTextBox log;ProgressBar progress;Panel languagePage;Button detect;int stage=-1;string initialMode;
     string[][] words=new[]{
         new[]{"Welcome to your label workspace","به فضای کار چاپ لیبل خوش آمدید","مرحباً بك في مساحة طباعة الملصقات"},
         new[]{"A precise, offline workspace for Brother PT-E550W.","فضای کاری دقیق و آفلاین برای Brother PT-E550W.","مساحة عمل دقيقة دون اتصال لطابعة Brother PT-E550W."},
@@ -295,7 +297,10 @@ public class Wizard:Form {
         var brand=new Label(){Text="CABLE LABEL\nSTUDIO",Location=new Point(28,38),Size=new Size(200,90),ForeColor=Color.White,Font=new Font("Segoe UI",22,FontStyle.Bold)};side.Controls.Add(brand);
         var caption=new Label(){Text="WINDOWS / OFFLINE\nBROTHER PT-E550W",Location=new Point(30,135),Size=new Size(190,60),ForeColor=Color.FromArgb(137,180,170),Font=new Font("Segoe UI",9)};side.Controls.Add(caption);
         steps=new Label(){Location=new Point(28,270),Size=new Size(190,170),ForeColor=Color.FromArgb(218,233,221),Font=new Font("Segoe UI",11)};side.Controls.Add(steps);
-        side.Controls.Add(new Label(){Text="VERSION 1.0.0\nLOCAL, BY DESIGN",Location=new Point(30,550),Size=new Size(180,60),ForeColor=Color.FromArgb(126,159,154),Font=new Font("Segoe UI",8)});
+        side.Controls.Add(new Label(){Text="VERSION 1.1.0 / MIT",Location=new Point(30,440),Size=new Size(180,30),ForeColor=Color.FromArgb(126,159,154),Font=new Font("Segoe UI",8)});
+        side.Controls.Add(new Label(){Text="Amir Rahimi\nسازنده / Creator / المطوّر\nرایگان / Free / مجاني · MIT",Location=new Point(28,480),Size=new Size(205,67),ForeColor=Color.FromArgb(218,233,221),Font=new Font("Segoe UI",9)});
+        var projectLink=new LinkLabel(){Text="GitHub · P-touch ↗",Location=new Point(28,560),Size=new Size(200,30),LinkColor=Color.FromArgb(232,184,106)};
+        projectLink.LinkClicked+=(o,e)=>Process.Start("https://github.com/aa70027/P-touch");side.Controls.Add(projectLink);
         body=new Panel(){Dock=DockStyle.Fill,Padding=new Padding(20)};Controls.Add(body);body.BringToFront();
         language=new ComboBox(){DropDownStyle=ComboBoxStyle.DropDownList,Location=new Point(495,20),Size=new Size(180,30)};language.Items.AddRange(new object[]{"English","فارسی","العربية"});body.Controls.Add(language);language.SelectedIndex=1;
         title=LabelAt("",35,78,640,75,23,true);subtitle=LabelAt("",35,158,640,60,10,false);
@@ -308,19 +313,47 @@ public class Wizard:Form {
         log=new RichTextBox(){Location=new Point(38,250),Size=new Size(630,235),ReadOnly=true,BackColor=dark,ForeColor=Color.FromArgb(188,222,207),BorderStyle=BorderStyle.None,Font=new Font("Consolas",9),RightToLeft=RightToLeft.No};body.Controls.Add(log);
         progress=new ProgressBar(){Location=new Point(38,505),Size=new Size(630,8),Style=ProgressBarStyle.Continuous};body.Controls.Add(progress);
         language.SelectedIndexChanged+=(s,e)=>RefreshView();FormClosing+=(s,e)=>{if(stage==2)e.Cancel=true;};
+        languagePage=new Panel(){Location=new Point(35,260),Size=new Size(640,180)};body.Controls.Add(languagePage);
+        string[] choices={"فارسی","English","العربية"};int[] indices={1,0,2};
+        for(int i=0;i<3;i++){
+            int chosen=indices[i];var choice=new Button(){Text=choices[i],Location=new Point(i*211,30),Size=new Size(195,72),FlatStyle=FlatStyle.Flat,Font=new Font("Segoe UI",16,FontStyle.Bold),BackColor=teal,ForeColor=Color.White};
+            choice.Click+=(o,e)=>{language.SelectedIndex=chosen;stage=0;RefreshView();};languagePage.Controls.Add(choice);
+        }
+        detect=ButtonAt("",38,497,285);detect.Click+=(o,e)=>DetectPrinters();
         RefreshView();
     }
+    void DetectPrinters(){
+        var report=new StringBuilder();report.AppendLine("Brother USB / Windows driver detection");
+        try{
+            using(var search=new System.Management.ManagementObjectSearcher("SELECT Name,PNPDeviceID,ConfigManagerErrorCode FROM Win32_PnPEntity"))
+            foreach(System.Management.ManagementObject item in search.Get()){
+                string id=Convert.ToString(item["PNPDeviceID"]);
+                if(id.IndexOf("VID_04F9",StringComparison.OrdinalIgnoreCase)>=0)report.AppendLine(Convert.ToString(item["Name"])+" | "+id+" | Driver error="+item["ConfigManagerErrorCode"]);
+            }
+            using(var search=new System.Management.ManagementObjectSearcher("SELECT Name,DriverName,PortName FROM Win32_Printer"))
+            foreach(System.Management.ManagementObject item in search.Get())if(Convert.ToString(item["DriverName"]).ToLowerInvariant().Contains("brother"))report.AppendLine(Convert.ToString(item["Name"])+" | "+item["DriverName"]+" | "+item["PortName"]);
+            report.AppendLine("USB hardware detection and installed queues are separate. Network discovery and MAC search are available in the application's Connection settings after installation.");
+        }catch(Exception ex){report.AppendLine("Detection error: "+ex.Message);}
+        using(var window=new Form(){Text="Brother · USB / Driver",Size=new Size(780,450),StartPosition=FormStartPosition.CenterParent}){
+            window.Controls.Add(new TextBox(){Multiline=true,ReadOnly=true,Dock=DockStyle.Fill,ScrollBars=ScrollBars.Both,Text=report.ToString(),Font=new Font("Segoe UI",10)});window.ShowDialog(this);
+        }
+    }
     void RefreshView(){
+        if(languagePage!=null)languagePage.Visible=stage==-1;
+        if(detect!=null){detect.Visible=stage==0;detect.Text=Lang==0?"Detect Brother printers":Lang==1?"تشخیص چاپگرهای Brother":"اكتشاف طابعات Brother";}
+        next.Visible=stage>=0;language.Visible=stage>=0;steps.Visible=stage>=0;
         bool rtl=Lang!=0;body.RightToLeft=rtl?RightToLeft.Yes:RightToLeft.No;steps.Text=T(21);steps.RightToLeft=rtl?RightToLeft.Yes:RightToLeft.No;
         // Retain the selected maintenance operation across language changes.
         int mi=mode.SelectedIndex;if(mi<0)mi=Array.IndexOf(new[]{"install","repair","update","uninstall"},initialMode);if(mi<0)mi=0;
         mode.Items.Clear();mode.Items.AddRange(new object[]{T(3),T(4),T(5),T(6)});mode.SelectedIndex=mi;
         foreach(Control c in body.Controls.OfType<Label>().ToArray())if(c!=title&&c!=subtitle)body.Controls.Remove(c);
         title.Text=T(stage==0?0:stage==1?17:stage==2?12:13);subtitle.Text=T(stage==0?1:stage==1?18:stage==2?16:22);
-        mode.Visible=path.Visible=browse.Visible=stage<2;launch.Visible=stage==3&&mi!=3;launch.Text=T(15);
+        mode.Visible=path.Visible=browse.Visible=stage>=0&&stage<2;launch.Visible=stage==3&&mi!=3;launch.Text=T(15);
         log.Visible=progress.Visible=stage>=2;back.Visible=stage==1;next.Enabled=stage!=2;language.Enabled=stage<2;
         next.Text=T(stage==0?9:stage==1?11:14);back.Text=T(10);browse.Text=T(8);
-        if(stage<2){LabelAt(T(2),38,230,630,28,10,true);LabelAt(T(7),38,315,630,28,10,true);LabelAt(T(16),38,400,630,75,10,false);LabelAt(T(22),38,477,630,64,9,false);}
+        if(stage>=0&&stage<2){LabelAt(T(2),38,230,630,28,10,true);LabelAt(T(7),38,315,630,28,10,true);LabelAt(T(16),38,400,630,75,10,false);LabelAt(T(22),38,432,630,60,9,false);}
+        if(stage==-1){title.Text="زبان را انتخاب کنید\nSelect your language\nاختر لغتك";title.Font=new Font("Segoe UI",19,FontStyle.Bold);title.Height=155;subtitle.Visible=false;}
+        else{title.Height=75;title.Font=new Font("Segoe UI",23,FontStyle.Bold);subtitle.Visible=true;}
         if(stage==3){log.Height=190;launch.Top=455;progress.Top=500;}
     }
     async void Next(object sender,EventArgs e){

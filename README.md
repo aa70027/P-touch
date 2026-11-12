@@ -1,56 +1,36 @@
-# Cable Label Studio 1.0.0
+# Cable Label Studio · P-touch
 
-Windows local web application for Brother PT-E550W. Runs offline, stores information locally, and opens in a browser.
+**Amir Rahimi** · Free / رایگان / مجاني · [MIT](LICENSE.txt)
 
-- [راهنمای فارسی](README.fa.md)
-- [English guide](README.en.md)
-- [الدليل العربي](README.ar.md)
-- [Requirements and verification record](ACCEPTANCE.md)
+نرم افزار پیشرفته طراحی و چاپ لیبل برای ویندوز، با رابط فارسی، انگلیسی و عربی؛ اتصال USB/Wi-Fi، Excel چندشیتی و مسیر زنده، طراحی لیبل کابل، قواعد شرطی، مدیریت کاربران و گزارش چاپ.
+
+Advanced local Windows label designer and printing software for Brother printers: USB/Wi-Fi, multi-sheet/live-path Excel, Access, cable layouts, rules, users, reports and GitHub updates. فارسی / English / العربية
+
+برنامج متقدم لتصميم الملصقات وطباعتها محلياً في Windows، بثلاث لغات، مع Excel متعدد الأوراق واتصال مباشر بالملف وتقارير وتحديثات GitHub.
 
 ## Download / دانلود / التنزيل
 
-- [Windows x64 installer / نصب‌کننده / المثبّت](https://github.com/aa70027/P-touch/releases/download/v1.0.0/CableLabelStudio-1.0.0-Setup.exe)
-- [Portable ZIP / نسخه بدون نصب / النسخة المحمولة](https://github.com/aa70027/P-touch/releases/download/v1.0.0/CableLabelStudio-1.0.0-Portable.zip)
-- [Source package / سورس / الشفرة المصدرية](https://github.com/aa70027/P-touch/releases/download/v1.0.0/CableLabelStudio-1.0.0-Source.zip)
-- [SHA-256 checksums](https://github.com/aa70027/P-touch/releases/download/v1.0.0/SHA256SUMS.txt)
+- [Windows x64 installer](https://github.com/aa70027/P-touch/releases/download/v1.1.0/CableLabelStudio-1.1.0-Setup.exe)
+- [Portable ZIP](https://github.com/aa70027/P-touch/releases/download/v1.1.0/CableLabelStudio-1.1.0-Portable.zip)
+- [Editable source](https://github.com/aa70027/P-touch/releases/download/v1.1.0/CableLabelStudio-1.1.0-Source.zip)
+- [SHA-256 checksums](https://github.com/aa70027/P-touch/releases/download/v1.1.0/SHA256SUMS.txt)
 
-Run the installer, then launch **Cable Label Studio** from the desktop or Start menu. The default URL is `http://127.0.0.1:8765`. No username or password is required initially.
+Install the package, choose فارسی / English / العربية on the first screen and launch Cable Label Studio. The browser opens a loopback-only local app. No login is required initially; authentication can be enabled in Settings.
 
-The application and setup are Windows x64 builds. Python is bundled. The setup wizard uses the Windows .NET Framework 4.7.2+ runtime supplied with current Windows 10/11 installations. USB requires the Brother PT-E550W Windows driver. Access import requires a matching 64-bit Microsoft Access Database Engine / Access Runtime driver. Both prerequisites are diagnosed in Settings and are not silently installed.
+## Guides / راهنما / الأدلة
 
-Physical-device acceptance is pending: the development machine has no installed Brother driver or attached PT-E550W. Simulation, software tests and installer tests are distinct from hardware validation. See `ACCEPTANCE.md`.
+- [فارسی](README.fa.md)
+- [English](README.en.md)
+- [العربية](README.ar.md)
+- [Release checklist and hardware limitations](NEXT_UPDATE.md)
+- [Requirements and validation](ACCEPTANCE.md)
 
-## قابلیت‌ها / Features / الميزات
+PT-E550W/P750W/P710BT use model-specific Raster profiles. P700, P900W, P950NW and listed QL models use the official Brother Windows driver; cutter/media settings remain in that driver. The generic driver profile requires manual model/media verification. Physical-printer acceptance remains pending; simulations and spool submission are not physical completion.
 
-طراحی سه‌زبانهٔ لیبل، چاپ USB و Wi-Fi، قالب‌های کابل و پچ‌پنل، ورود Excel و Access، فرمول‌های شرطی، مدیریت کاربران و گزارش چاپ.
-
-Trilingual label designer, USB/Wi-Fi submission, cable and patch-panel layouts, Excel/Access import, conditional rules, accounts and usage reports.
-
-تصميم ملصقات بثلاث لغات، إرسال عبر USB وWi-Fi، قوالب الكابلات ولوحات التوصيل، استيراد Excel وAccess، قواعد شرطية وحسابات وتقارير.
-
-63 software tests and 20 Windows package/integration checks passed. Physical-printer acceptance is still pending. [Validation details](ACCEPTANCE.md).
-
-![Persian label designer](verification/designer-fa.png)
+![Persian label designer](verification/designer-fa-v110.jpg)
 
 ## Development
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
-.\.venv\Scripts\python.exe run.py --no-browser
-.\.venv\Scripts\python.exe -m pytest -q
-.\.venv\Scripts\python.exe build.py
-```
+Windows x64, Python 3.12. Create a virtual environment, install requirements-dev.txt and run `python run.py`. Run `python -m pytest tests/test_core.py tests/test_update.py -q`. Build offline packages with `python build.py`; package the allowlisted source with `python package_source.py`. No remote hosting service or cloud account is required for normal printing.
 
-The build uses PyInstaller and the Windows Framework C# compiler at `%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\csc.exe`. No Node/npm build is needed. Do not commit runtime data, print content or uploads. `run.py --data-dir PATH --port 8766 --no-browser` provides an isolated QA instance. `run.py --data-dir PATH --stop` stops that instance.
-
-## Source structure
-
-`labelstudio/app.py`: local API and access checks; `store.py`: SQLite, accounts and resources; `formulas.py`: bounded expression evaluator; `render.py`: shared print/preview renderer; `printer.py`: PT-E550W raster encoding, TCP and Windows RAW; `jobs.py`: serial queue and record gates; `web/`: offline trilingual interface; `installer/Setup.cs`: offline install/repair/update/uninstall wizard; `tests/`: integration and protocol checks.
-
-The application is an independent project, not a Brother product. It uses its own `.label.json` document format; native P-touch `.lbx` import/export is not implemented.
-
-
-## Next update / آپدیت بعدی / التحديث التالي
-
-[Accepted six-point requirements / شش الزام ثبت‌شده / المتطلبات الستة](NEXT_UPDATE.md). These are planned for the next update and are not yet part of version 1.0.0. Full translated details are in all three guides.
+User data: `%LOCALAPPDATA%\CableLabelStudio`. Installer maintenance preserves it. Linked Excel files remain external and require a separate backup. The executable is unsigned. Brother driver/software licenses are separate from this project's MIT license.

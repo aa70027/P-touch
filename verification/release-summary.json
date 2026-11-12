@@ -1,31 +1,36 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "date": "2026-11-13",
   "timezone": "Asia/Tehran",
-  "unit_tests_passed": 63,
+  "creator": "Amir Rahimi",
+  "license": "MIT",
+  "unit_tests_passed": 90,
   "package_checks_passed": 17,
   "windows_integration_checks_passed": 3,
+  "native_update_handoff_checks_passed": 4,
+  "frozen_update_feature_checks_passed": 5,
   "physical_printer_tested": false,
   "access_driver_available_on_build_host": false,
   "native_installer_screenshot_verified": false,
+  "native_file_picker_interactive_verified": false,
   "web_ui_verified": [
     "fa",
     "en",
     "ar",
     "desktop",
-    "narrow window",
-    "simulation",
-    "keyboard record gates",
-    "save file"
+    "multi-sheet import",
+    "creator and project links",
+    "connection screen",
+    "GitHub release check and same-page status"
   ],
   "artifacts": {
-    "CableLabelStudio-1.0.0-Setup.exe": {
-      "bytes": 29142016,
-      "sha256": "c11ce401f7e8240656b35a3f052a5789811b15a182b4b6ebdbd2131d91dc7ba5"
+    "CableLabelStudio-1.1.0-Setup.exe": {
+      "bytes": 30193664,
+      "sha256": "0e22f42dd7702a3dd16ee00e100a01a06c2fe1fdaf1f89782801e6f3c2762a15"
     },
-    "CableLabelStudio-1.0.0-Portable.zip": {
-      "bytes": 29099755,
-      "sha256": "0cd846e938bbf6f573ff832846629f471292329cc1257a05d52300b2d7bb2616"
+    "CableLabelStudio-1.1.0-Portable.zip": {
+      "bytes": 30146077,
+      "sha256": "b364c0115e578974168054ad849bfbac40763422229dc38ec93e4aff80a5f879"
     }
   }
 }

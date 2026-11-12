@@ -8,7 +8,8 @@ import uuid
 from .formulas import apply_rules
 from .models import PrintRequest, Settings
 from .render import render_label,png_bytes
-from .printer import Transport,raster_page,cut_for
+from .printer import Transport,DriverTransport,raster_page,cut_for
+from .profiles import get_profile
 
 
 def plan(request):
@@ -91,6 +92,10 @@ class JobQueue:
         settings=Settings.model_validate(payload['settings'])
         user=self.store.user(job['owner'])
         assets=self.asset_factory(user)
+        driver=get_profile(settings.model)['transport']=='driver'
+        if not request.simulation and settings.connection=='wifi' and not driver:
+            from .discovery import resolve
+            settings=resolve(settings)
         if self.cancelled(ident):
             self.update(ident,state='cancelled')
             return
@@ -110,16 +115,18 @@ class JobQueue:
                 image,meta=render_label(page,step['row'],assets)
                 cut=cut_for(settings,step['end_record'],step['end_file'],step['last'])
                 segment_last=step['last'] or (request.mode=='confirm' and step['end_record'])
-                data=raster_page(image,page,cut,first,segment_last)
+                native=get_profile(page.model)['transport']=='raster'
+                data=raster_page(image,page,cut,first,segment_last) if native else None
                 if request.simulation:
                     (output/f'{step["index"]:06}.png').write_bytes(png_bytes(image))
-                    (output/f'{step["index"]:06}.prn').write_bytes(data)
+                    if data is not None:(output/f'{step["index"]:06}.prn').write_bytes(data)
                     simulated+=1
                 else:
                     if transport is None:
-                        transport=Transport(settings,'Cable Label Studio '+ident)
+                        transport=(DriverTransport if driver else Transport)(settings,'Cable Label Studio '+ident)
                         transport.__enter__()
-                    transport.send(data)
+                    if driver:transport.send_image(image,meta)
+                    else:transport.send(data)
                     sent+=1
                 self.update(ident,sent=sent,simulated=simulated)
                 first=False

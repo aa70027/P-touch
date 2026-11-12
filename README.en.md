@@ -1,10 +1,10 @@
-# Cable Label Studio — 1.0.0
+# Cable Label Studio — 1.1.0
 
 An offline Windows application with a browser interface for designing and submitting Brother PT-E550W labels. The local engine stores templates, files, uploads, accounts, rules and reports on this computer.
 
 ## Installation and maintenance
 
-Run `CableLabelStudio-1.0.0-Setup.exe`. Choose English, Persian or Arabic, select New installation and choose a dedicated installation folder. The wizard displays progress, SHA-256 verification and a saved operation log. Launch the desktop or Start menu shortcut. The default URL is `http://127.0.0.1:8765` and no login is required initially.
+Run `CableLabelStudio-1.1.0-Setup.exe`. Choose English, Persian or Arabic, select New installation and choose a dedicated installation folder. The wizard displays progress, SHA-256 verification and a saved operation log. Launch the desktop or Start menu shortcut. The default URL is `http://127.0.0.1:8765` and no login is required initially.
 
 The package targets Windows 10/11 x64 and bundles Python. The wizard uses Windows .NET Framework 4.7.2 or later. Installation is per Windows user; choosing a protected installation folder may require appropriate Windows permissions. The application binds only to loopback, not the LAN.
 
@@ -44,11 +44,11 @@ Upload PNG/JPG/JPEG/BMP/WEBP images or TTF/OTF fonts in Images & fonts. They rem
 
 ## Excel, CSV and Access
 
-Upload XLSX, XLSM, XLS, CSV, TSV, MDB or ACCDB. Choose a worksheet or Access table, text encoding and delimiter as applicable, then read the source. The first spreadsheet/CSV row supplies column names; duplicate/blank column names are made unique. Excel formulas use the saved calculated values: recalculate and save the workbook in Excel before import. Macros are not executed.
+Upload XLSX, XLSM, XLS, CSV, TSV, MDB or ACCDB. Choose one or more worksheets, or an Access table, text encoding and delimiter as applicable, then read the source. The first spreadsheet/CSV row supplies column names; duplicate/blank column names are made unique. Excel formulas use the saved calculated values: recalculate and save the workbook in Excel before import. Macros are not executed.
 
 Access requires a 64-bit Microsoft Access Database Engine or Access Runtime ODBC driver. Diagnostics identifies missing drivers. The application does not silently install this prerequisite. Excel and CSV do not need Access or Microsoft Office installed.
 
-Imported source files are snapshots. Re-upload the original file to capture external changes. Reload source re-reads the stored snapshot with the chosen sheet/table settings. Save a dataset, use it in the designer and bind text with `{Rack}`, `{Port}` or any exact column name. Manual JSON arrays and inline record editing are also available. A dataset may contain up to 100,000 nonempty records; larger input is rejected rather than truncated. The grid shows a bounded preview; the complete imported dataset remains available to printing and export.
+Uploaded source files are snapshots; linked Windows paths are refreshed as described in the 1.1.0 section below. Re-upload the original file to capture external changes. Reload source re-reads the stored snapshot with the chosen sheet/table settings. Save a dataset, use it in the designer and bind text with `{Rack}`, `{Port}` or any exact column name. Manual JSON arrays and inline record editing are also available. A dataset may contain up to 100,000 nonempty records; larger input is rejected rather than truncated. The grid shows a bounded preview; the complete imported dataset remains available to printing and export.
 
 ## Rules and expressions
 
@@ -71,7 +71,7 @@ Continuous mode submits all records without a manual gate. Confirm-each-record m
 
 Settings provides full, half or no cut between pages/copies, at record boundaries, between files and at the end of the final file. Priority is final-job boundary, file boundary, record boundary, then page boundary. Tape material and printer firmware may constrain the resulting combination; validate with your real cassette before production.
 
-Simulation is an explicit option and sends no data to a printer. It writes PNG and printer-specific PRN output, available in job details. Simulation never increases the real submission counter. A job is fully preflighted before queueing, including all record-dependent formulas and layouts. A single job is limited to 100,000 labels; split larger runs into batches.
+Simulation is an explicit option and sends no data to a printer. It writes PNG and, for native Raster models, printer-specific PRN output, available in job details. Simulation never increases the real submission counter. A job is fully preflighted before queueing, including all record-dependent formulas and layouts. A single job is limited to 100,000 labels; split larger runs into batches.
 
 Cancel stops future sends; data already handed to Windows/the printer may still print. A connection failure never causes an automatic resend. After a crash, active jobs become Interrupted and require review before reprinting to avoid duplicates. History supports reprinting the saved job request after explicit review.
 
@@ -95,15 +95,40 @@ The application stores data in `%LOCALAPPDATA%\CableLabelStudio`, with logs in `
 
 See `ACCEPTANCE.md` for software and installer checks. A physical PT-E550W and its Brother driver were unavailable on the build machine. Physical USB/Wi-Fi printing, actual sizes, half-cut/full-cut combinations and high-resolution results still require acceptance with the user's device. Access import needs verification with a real database and the matching driver. The program does not represent simulations or spool submission as verified physical output.
 
-## Required next update — recorded 2026-11-13
+## Version 1.1.0 features
 
-These six requirements are accepted for the next update and are not yet part of version 1.0.0. The durable checklist and acceptance criteria are in [NEXT_UPDATE.md](NEXT_UPDATE.md).
+Creator: **Amir Rahimi**. Advanced label design and printing software, free and open source under the [MIT license](LICENSE.txt). Project, editable source and Windows releases: https://github.com/aa70027/P-touch . Every application page, login screen and installer includes the creator, free license and project link.
 
-1. **Language must be the installer's first question.** Before any other question or step, show “زبان را انتخاب کنید / Select your language / اختر لغتك”. Display three separate buttons, “فارسی”, “English” and “العربية”, simultaneously rather than in a dropdown. Continue the wizard in the selected language.
-2. **Multi-sheet Excel import.** Discover and display all worksheets in a workbook. Allow one or several sheets to be selected and read for preview, field binding and printing, preserving each record's source sheet. The current release can select and read one sheet; importing/printing several sheets in one workflow is planned here.
-3. **Direct Windows Excel-file connection.** In addition to upload, use a Windows file picker to select and retain the real file path. Refresh and pre-print reads must load saved changes from that same file without another upload. Support changing the path and reporting missing, inaccessible or locked files. Unsaved in-memory Excel changes are not yet present in the file on disk.
-4. **Online updates from GitHub.** Compare the installed version with releases in this project's official repository, report new versions, and support downloading and installing an update. Show progress, logs, result reports and check/download/install errors on that same update page, while preserving user data.
-5. **Printer-model detection.** Identify Brother models over USB and Wi-Fi, with or without an installed printer driver. Display detected model, driver status and connection separately. Use the local Windows component for device/network operations; provide an installer detection option/tool when a browser-only approach is insufficient. An unreachable device must not be falsely identified or reported online.
-6. **Additional Brother models and software downloads.** Extend support to other Brother label-printer models using model-specific capabilities and profiles for tape width, resolution, cutting and connection type. Add model selection and downloads of compatible drivers/software from official Brother sources, with download status and errors.
+### Installation and online updates
 
-Keep all Persian, English and Arabic guides synchronized locally and on GitHub when implementing these requirements. They must remain marked planned until implemented and verified.
+The first wizard question is “زبان را انتخاب کنید / Select your language / اختر لغتك”, with three simultaneous buttons: فارسی, English and العربية. Only after language selection are installation mode and destination shown. New install, repair, update, uninstall and custom paths remain available. “Detect Brother printers” in the installer distinguishes USB PnP hardware from installed queues/drivers. Maintenance preserves user data.
+
+Open Settings → Updates & downloads and check GitHub releases. The same page shows installed/release versions, download/install progress, events, errors and the persistent installer log. Preview releases are optional; save the setting or press Check to apply it. Online installation requires the packaged Windows app. Downloads come from this repository's Releases and must pass its SHA-256 checksum before installation. This is transfer-integrity verification, not a publisher code signature. A database backup precedes installation; the installer rolls back previous application files if copying fails. Active print jobs block installation. The local service stops briefly during installation; this page reconnects automatically and displays the result/log. Use the downloadable offline installer if an internet update is unavailable.
+
+### Multi-sheet Excel and a live Windows path
+
+In Data sources, either upload a workbook or choose Link Windows Excel file to open the real Windows file picker. Linked mode stores the original path privately without creating an uploaded copy. All sheets appear as checkboxes; select one or several and press Reload source. Columns are unioned and `_sheet` preserves each record's source worksheet for rules and text bindings. An existing `_sheet` column is preserved as `_sheet_value`. The aggregate limit is 100,000 selected records.
+
+Edit and **save** the workbook in Excel. Preview and creation of a new print job reread the original file without reuploading. Each queued job holds a fresh, fixed record snapshot so later external edits cannot change a running job. Reload source refreshes the visible table and record count. Manual cell editing in the application detaches automatic reads until the next source reload. Change linked file path replaces the original path through another native selection. Missing, inaccessible or exclusively locked files produce an error rather than silently printing stale data. Unsaved Excel changes and formula recalculation are not available; save Excel's calculated values first. Save a dataset to retain the source binding for later sessions. Backups retain linked paths, not external workbook contents; back up those files separately.
+
+### Connections, detection and changing IP addresses
+
+Settings → Connection & discovery configures model, USB/Wi-Fi, Windows queue, IP/port, hostname, MAC and local subnet. Save before identifying. USB model detection uses PnP names/hardware IDs even when the driver is absent; installed driver/queue state is separate. Network model identification uses a read-only SNMP query. With SNMP disabled or blocked, the model stays unknown. TCP reachability alone does not prove model identity or physical completion.
+
+Prefer a stable printer DNS hostname or a DHCP reservation on the router. Alternatively, enter the printer's **Wi-Fi MAC**, enable Find current IP by MAC before printing and choose the local adapter subnet. Search local network displays progress and matching IP/MAC/model candidates. Select the correct result and save. Resolution also runs before a print job starts; a missing/mismatched MAC blocks printing. MAC lookup is limited to the same local link. Routed networks, different VLANs and client isolation need valid DNS/router configuration. Discovery accepts only an explicitly selected local IPv4 subnet of at most 1024 addresses. Unknown model results remain unknown.
+
+**PT-E550W direct mode:** select `Menu → WLAN → Network Mode → Direct Mode` on the printer. Read its network/IP information at `WLAN → Network Status → Direct Mode`; obtain the SSID/key from the printer or official Printer Setting Tool. Open Windows Wi-Fi settings from the app and join the printer's SSID. Enter the displayed IP or search its Wi-Fi MAC. The PC may lose internet access while directly connected, so download updates first.
+
+**Through the router:** select `Menu → WLAN → Network Mode → Infrastructure Mode`, then `WLAN → Network Setting → Infrastructure Mode → Setup Wizard`. Join the router SSID and enter its key on the printer. Connect Windows to the same router over Ethernet or Wi-Fi. Avoid guest networks/client isolation. Save the hostname/IP and MAC in the app. The app does not collect the Wi-Fi password or silently reconfigure the printer. E550W Direct and Infrastructure modes are not simultaneous.
+
+### Other Brother models and official downloads
+
+PT-E550W, PT-P750W and PT-P710BT have documented Raster profiles. E550W/P750W offer USB and Wi-Fi, full/half/no-cut policies. P710BT uses USB here and supports full/no cut, not Wi-Fi or half-cut. These profiles support 3.5–24 mm TZe media and 180×180 / 180×360 rendering.
+
+PT-P700, PT-P900W, PT-P950NW, QL-800, QL-810W and QL-820NWB use an installed official Brother Windows driver, with a USB or network queue. P900/P950 render up to 36 mm at 360×360 / 360×720; the listed QL profiles up to 62 mm at 300×300 / 300×600. A generic Brother Windows driver profile permits additional models after their actual media is configured and verified in the driver. For driver transport, media size, orientation, final quality and physical cuts are controlled by the driver's private properties. App cut policies do not synthesize RAW commands for these models. Incompatible media dimensions are rejected instead of silently scaled. Driver-free direct RAW Wi-Fi is not supported for this group. Their simulation produces PNG; PRN is available only for Raster profiles.
+
+On Updates & downloads, select a model and open its official Brother download page. Choose the Windows version/software on Brother's site, then paste the direct `.exe`, `.msi` or `.zip` download URL into the app. Progress, errors, the downloaded file and SHA-256 appear on the same page. Only HTTPS links on brother.com/subdomains are accepted. Open the downloaded file to install it; drivers are not executed automatically. Brother controls its own driver versions and license terms.
+
+Software and simulation tests do not certify physical printers. Actual USB/Wi-Fi output, dimensions, special media, cutting and resolution require acceptance on each device. Access requires the matching 64-bit ODBC driver and a real database test. See [ACCEPTANCE.md](ACCEPTANCE.md) and [NEXT_UPDATE.md](NEXT_UPDATE.md).
+
+Official references: [E550W network guide](https://download.brother.com/welcome/docp100010/pte550w_eng_net_01.pdf), [E550W/P750W/P710BT Raster reference](https://download.brother.com/welcome/docp100064/cv_pte550wp750wp710bt_eng_raster_102.pdf), [P900W specifications](https://support.brother.com/g/b/spec.aspx?c=my&lang=en&prod=p900weas).

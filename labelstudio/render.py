@@ -136,6 +136,10 @@ def code128(text):
 
 
 def render_label(label: Label, row: dict, assets):
+    from .profiles import get_profile, printable as printable_mm
+    profile=get_profile(label.model)
+    print_mm=printable_mm(label.width,label.model)
+    printable=round(print_mm*DPM)
     px = DPM*SCALE
     # Reserve the unavoidable 2 mm feed at each end inside the requested length.
     # Optional whitespace can be removed without pretending the cutter can reach the head.
@@ -172,7 +176,7 @@ def render_label(label: Label, row: dict, assets):
             x, y = round((before+element.x+ox)*px),round((element.y+oy)*px)
             if label.kind == 'cable-wrap':
                 # Repeat in the printable height with a consistent row spacing.
-                printable, _ = TAPE[label.width]
+                printable = round(print_mm*DPM)
                 top = (label.width-printable/DPM)/2
                 step = printable/DPM/label.wrap_repeats
                 if source.height/px > step:
@@ -198,31 +202,32 @@ def render_label(label: Label, row: dict, assets):
                 raise ValueError('SEPARATOR_TOO_WIDE')
             image.paste(part,(center-part.width//2,(height-part.height)//2))
         if label.separator_line:
-            printable,_=TAPE[label.width]
+            printable=round(print_mm*DPM)
             top=round((label.width-printable/DPM)*px/2)+SCALE
             draw.line((center,top,center,height-top-1),fill=0,width=SCALE)
     if label.kind in ('patch-panel','terminal-block') and label.separator_line:
-        printable,_=TAPE[label.width]
+        printable=round(print_mm*DPM)
         top=round((label.width-printable/DPM)*px/2)+SCALE
         for i in range(1,label.cells):
             x=round((before+i*label.pitch)*px)
             draw.line((x,top,x,height-top-1),fill=0,width=SCALE)
     if label.border:
-        printable,_=TAPE[label.width]
+        printable=round(print_mm*DPM)
         top=round((label.width-printable/DPM)*px/2)+SCALE
         draw.rectangle((round(2*px)+SCALE,top,image.width-round(2*px)-SCALE-1,height-top-1),outline=0,width=SCALE)
     if label.mirror:
         image = ImageOps.mirror(image)
     # Mechanical resolution is 180 dpi across tape, 180/360 dpi along its length.
-    image = image.resize((max(1,round(length*DPM*(2 if label.quality=='high' else 1))),round(label.width*DPM)),Image.Resampling.LANCZOS)
+    across=profile['dpi'];along=profile['high_dpi'] if label.quality=='high' else across
+    image = image.resize((max(1,round(length*along/25.4)),round(label.width*across/25.4)),Image.Resampling.LANCZOS)
     image = image.point(lambda p: 0 if p < 160 else 255,'1')
     bbox = ImageOps.invert(image.convert('L')).getbbox()
-    printable,_=TAPE[label.width]
+    printable=round(print_mm*across/25.4)
     top=(image.height-printable)//2
     if bbox and (bbox[1]<top or bbox[3]>top+printable):
         raise ValueError('OUTSIDE_PRINTABLE_AREA')
-    return image, {'length_mm':round(length,2),'width_mm':label.width,'printable_mm':round(printable/DPM,2),
-                   'resolution':[360 if label.quality=='high' else 180,180],
+    return image, {'length_mm':round(length,2),'width_mm':label.width,'printable_mm':round(print_mm,2),
+                   'resolution':[along,across],'model':label.model,'driver_controls':profile['driver_controls'],
                    'hardware_feed_mm':4,'estimated_output_mm':round(max(24.5,length),2),
                    'actual_margin_before_mm':before,'actual_margin_after_mm':after,
                    'warnings':(['DIE_CUT_LAYOUT_ON_CONTINUOUS_TAPE'] if label.kind=='die-cut-flag' else []) + ['HARDWARE_FEED_ADDED']}

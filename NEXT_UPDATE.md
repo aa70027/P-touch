@@ -1,38 +1,38 @@
-# الزامات آپدیت بعدی / Next update requirements / متطلبات التحديث التالي
+# Release 1.1.0 checklist / چک‌لیست نسخهٔ ۱٫۱٫۰ / قائمة الإصدار ١٫١٫٠
 
-Recorded: 2026-11-13 · Asia/Tehran
+Recorded and implemented: 2026-11-13 · Asia/Tehran
 
-**وضعیت:** درخواست‌های کاربر برای آپدیت بعدی، پس از نسخهٔ ۱٫۰٫۰. ثبت این سند، به معنی پیاده‌سازی قابلیت‌ها نیست. شماره و تاریخ نسخهٔ بعد هنوز تعیین نشده است. هر شش مورد شرط پذیرش آپدیت بعدی هستند.
+**فارسی:** شش درخواست آپدیت قبلی و درخواست‌های جدید در کد و رابط نسخهٔ ۱٫۱٫۰ پیاده‌سازی شده‌اند. تیک‌ها وضعیت پیاده‌سازی نرم‌افزار را نشان می‌دهند؛ آزمون فیزیکی چاپگر، صحت ابعاد، برش و اتصال با دستگاه واقعی همچنان باید جدا انجام شود. محدودیت‌های مسیر درایور ویندوز در سه راهنما ثبت شده‌اند.
 
-**Status:** Accepted user requirements for the next release after 1.0.0. Planned, not implemented by this documentation change. Next version/date are not assigned.
+**English:** Checkmarks represent implemented software paths, not physical printer certification. Tests distinguish mock discovery, software simulation, Windows integration and real device acceptance. Model-specific driver limitations are explicit in all guides.
 
-**الحالة:** متطلبات المستخدم المعتمدة للإصدار التالي بعد ١٫٠٫٠؛ مخططة ولم تُنفّذ بمجرد تحديث الوثائق.
+**العربية:** العلامات تخص تنفيذ مسارات البرنامج، ولا تعني اعتماد طابعة فعلية. اختبارات الأجهزة والقطع والأبعاد تبقى منفصلة، وحدود مسار برنامج تشغيل Windows موثقة.
 
-## چک‌لیست الزامی
+## Accepted update requirements
 
-- [ ] **NU-01 — اولین سؤال نصب‌کننده: زبان، با سه دکمه.** اولین صفحه فقط انتخاب زبان باشد؛ پرسش هم‌زمان فارسی، انگلیسی و عربی و هر سه دکمهٔ فارسی / English / العربية دیده شوند. هیچ سؤال مسیر، عملیات نصب یا پیش‌نیازی پیش از آن مطرح نشود. مراحل بعد با زبان انتخابی باز شوند.
-- [ ] **NU-02 — ورود چند شیت Excel.** شناسایی همهٔ شیت‌ها، انتخاب یک یا چند شیت و خواندن/پیش‌نمایش/چاپ داده‌های انتخاب‌شده با حفظ نام شیت. انتخاب یک شیت موجود، جایگزین این الزام چندشیتی نیست.
-- [ ] **NU-03 — منبع Excel مبتنی بر مسیر واقعی ویندوز.** انتخاب فایل با پنجرهٔ ویندوز، ذخیرهٔ مسیر، بازخوانی تغییرات ذخیره‌شده بدون آپلود مجدد، انتخاب شیت‌ها در این حالت نیز، امکان تعویض مسیر و پیام روشن برای فایل حذف‌شده، قفل‌شده یا بدون دسترسی. آخرین نسخهٔ ذخیره‌شده پیش از ایجاد کار چاپ خوانده شود.
-- [ ] **NU-04 — بررسی و نصب آپدیت از GitHub.** مقایسه با Releases مخزن `aa70027/P-touch`، نمایش نسخهٔ نصب‌شده و نسخهٔ جدید، دانلود/نصب اینترنتی و نمایش پیشرفت، لاگ، گزارش و خطا در همان صفحه. حفظ داده‌ها و کنترل صحت دانلود؛ شکست دانلود/نصب نباید موفقیت گزارش شود.
-- [ ] **NU-05 — تشخیص مدل Brother با/بدون درایور و USB/Wi-Fi.** وضعیت مدل، درایور و اتصال مستقل باشند. کارهای شناسایی در بخش محلی ویندوز انجام شوند؛ اگر وب به‌تنهایی کافی نبود، گزینهٔ تشخیص در نصب‌کننده ارائه شود. در حالت نبود دستگاه، اتصال ناممکن یا مدل مبهم، وضعیت واقعی «یافت نشد/نامشخص» نمایش داده شود.
-- [ ] **NU-06 — سایر مدل‌های لیبل‌پرینتر Brother و دانلود نرم‌افزارشان.** پروفایل سازگاری هر مدل و تنظیمات واقعی عرض، وضوح، برش و USB/Wi-Fi اضافه شوند. دانلود درایور و نرم‌افزارهای مدل انتخابی از منابع رسمی Brother، با وضعیت و خطای دانلود، در دسترس باشد. ویژگی فیزیکی پشتیبانی‌نشده نباید برای مدل دیگری وعده داده شود.
+- [x] **NU-01:** First wizard question in three languages, with simultaneous فارسی / English / العربية buttons. Mode/path questions appear only after selection. Built native wizard; native desktop visual/input verification remains unavailable on this host.
+- [x] **NU-02:** Multi-sheet XLSX/XLS import, one/many sheet selection, unioned columns, `_sheet` identity, combined row limit. Two-sheet file exercised through API and web UI.
+- [x] **NU-03:** Native Windows file picker, private linked source path, change path, fresh pre-preview/pre-job reads, missing/locked-file errors, saved dataset binding. Integration test modifies the original workbook and verifies fresh preview/job snapshot without uploading. Interactive native picker needs final desktop acceptance.
+- [x] **NU-04:** Official GitHub Releases check, stable/preview selection, verified download, persistent progress/events/error/log page, backup and native update/restart helper. Integrity failures block execution. Windows update handoff tested separately from network download.
+- [x] **NU-05:** Brother USB PnP model/hardware IDs independent of driver, installed queues/drivers, SNMP network identity, unknown states, installer detection option. USB/network identity tests use controlled fixtures; no physical model certification is implied.
+- [x] **NU-06:** Model catalog, capability-based widths/resolutions/cuts, native Raster family plus official Windows-driver transport, generic driver option, official Brother download pages/direct-file downloads with progress/errors. Hardware/driver-dependent controls are disclosed rather than assumed.
 
-## معیار پذیرش و ترتیب کار
+## Additional requested changes
 
-1. پیش از طراحی یا کدنویسی آپدیت بعدی، این شش الزام و بخش برنامهٔ نسخهٔ بعد در هر سه README خوانده شوند.
-2. انتخاب زبان در اولین اجرای واقعی نصب‌کننده بررسی شود؛ هر سه زبان و سه دکمه بدون بازکردن فهرست در دسترس باشند.
-3. یک فایل نمونه با حداقل دو شیت، انتخاب چند شیت و حفظ نام شیت در پیش‌نمایش/چاپ آزمایش شود.
-4. فایل Excel از مسیر ویندوز انتخاب، سپس در Excel تغییر و ذخیره شود؛ بدون آپلود مجدد، پیش‌نمایش و کار چاپ جدید، دادهٔ تازه را بخوانند. خطاهای دسترسی و قفل نیز بررسی شوند.
-5. بررسی نسخه، نبود نسخهٔ جدید، دریافت نسخهٔ جدید، خطای شبکه، خطای دانلود و نتیجهٔ نصب در همان صفحهٔ آپدیت دیده شوند. اطلاعات کاربر بعد از ارتقا باقی بمانند.
-6. مدل/درایور/اتصال برای USB و Wi-Fi با درایور و بدون درایور جداگانه بررسی شوند؛ تست شبیه‌سازی جای آزمون دستگاه واقعی معرفی نشود.
-7. برای مدل‌های Brother اضافه‌شده، امکانات و محدودیت‌های واقعی ثبت و مسیر دانلود رسمی بررسی شود. سازگاری اعلام‌نشده یا آزمایش‌نشده صریح باقی بماند.
-8. هر مورد تنها پس از پیاده‌سازی و بررسی علامت بخورد. نتیجه و محدودیت‌ها در راهنماهای [فارسی](README.fa.md)، [English](README.en.md) و [العربية](README.ar.md)، هم در سیستم محلی و هم GitHub، هماهنگ شوند.
+- [x] Creator **Amir Rahimi**, project link and free MIT license in installer, sidebar below version, footer on every app view and login screen.
+- [x] Persian repository description including **نرم افزار پیشرفته طراحی و چاپ لیبل**; bilingual project README.
+- [x] Local subnet MAC-to-IP discovery with progress, exact MAC matching and automatic resolution before printing; stale/mismatched addresses block printing.
+- [x] Stable DNS hostname option and DHCP reservation guidance for changing IP addresses.
+- [x] Separate Wireless Direct and router Infrastructure configuration guidance, Windows Wi-Fi settings action and official model documentation links.
+- [x] Persian, English and Arabic guides updated and included in source/Windows packages; GitHub source/release publication tracked with release artifacts.
 
-## منابع مرجع / Reference / المراجع
+## Acceptance still required on real hardware
 
-- [فارسی: برنامهٔ نسخهٔ بعد](README.fa.md)
-- [English: required next update](README.en.md)
-- [العربية: متطلبات التحديث التالي](README.ar.md)
-- Repository: https://github.com/aa70027/P-touch
+- [ ] Actual PT-E550W USB and Wi-Fi output, direct/router modes, changing DHCP lease, matching cassette, dimensions and cutter/quality combinations.
+- [ ] Each additional physical model and official driver, media dimensions/cutter settings and supported special media.
+- [ ] Real Access database import with the matching 64-bit ODBC driver.
+- [ ] Native desktop appearance/input and file selection on the user's interactive Windows desktop; browser UI tests do not replace this.
 
-The three guides contain the full six-point requirements in their respective languages. Preserve them as release requirements; do not describe them as shipped features before implementation and verification.
+See [فارسی](README.fa.md), [English](README.en.md), [العربية](README.ar.md) and [validation details](ACCEPTANCE.md).
+
+Repository: https://github.com/aa70027/P-touch

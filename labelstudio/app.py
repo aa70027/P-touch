@@ -36,7 +36,14 @@ def create_app(data_dir=None):
     app.state.shutdown=None
     app.state.restart=None
     app.state.local_csrf=secrets.token_urlsafe(32)
+    import threading
+    app.state.operations=threading.RLock()
     app.state.login_attempts={}
+    from .discovery import Discovery
+    from .updater import Updater
+    from .profiles import PROFILES,get_profile,PROJECT
+    discovery=Discovery();updater=Updater(store.root)
+    app.state.updater=updater
     app.add_middleware(TrustedHostMiddleware,allowed_hosts=['127.0.0.1','localhost','[::1]','testserver'])
 
     @app.middleware('http')
@@ -133,7 +140,7 @@ def create_app(data_dir=None):
         return {'version':__version__,'language':settings.language,'auth_enabled':settings.auth_enabled,
                 'user':store.public_user(user) if user else None,'csrf':session[1] if session else app.state.local_csrf if user else '',
                 'data_dir':str(store.root) if user and user['role']=='admin' else None,
-                'fonts':list(SYSTEM_FONTS),'default_width':settings.default_width,'default_quality':settings.default_quality}
+                'project_url':PROJECT,'creator':'Amir Rahimi','license':'MIT','profiles':PROFILES,'model':settings.model,'fonts':list(SYSTEM_FONTS),'default_width':settings.default_width,'default_quality':settings.default_quality}
 
     class Login(BaseModel):
         username:str=Field(max_length=200)
@@ -193,9 +200,10 @@ def create_app(data_dir=None):
     @app.get('/api/diagnostics')
     def diagnostics(user=Depends(admin)):
         from PIL import features
-        return {'access_drivers':access_drivers(),'shaping':'RAQM' if features.check_feature('raqm') else 'Arabic reshaper + Unicode bidi',
+        from .discovery import usb_devices,interfaces
+        return {'usb_devices':usb_devices(),'interfaces':interfaces(),'profiles':PROFILES,'access_drivers':access_drivers(),'shaping':'RAQM' if features.check_feature('raqm') else 'Arabic reshaper + Unicode bidi',
                 'data_dir':str(store.root),'printer':printer_status(store.settings()),'platform':sys.platform,
-                'driver_url':'https://support.brother.com/g/b/downloadtop.aspx?c=us&lang=en&prod=e550weus',
+                'driver_url':get_profile(store.settings().model)['download_url'],
                 'access_url':'https://www.microsoft.com/en-us/download/details.aspx?id=54920'}
 
     @app.get('/api/resources')
@@ -271,6 +279,7 @@ def create_app(data_dir=None):
         item=store.resource(ident,user)
         if item['kind'] not in ('image','font','source'):
             raise KeyError('ASSET_NOT_FOUND')
+        if item['payload'].get('linked_path'):raise ValueError('LINKED_SOURCE_USE_DATA_READ')
         path=store.root/'assets'/item['payload']['file']
         media='font/ttf' if item['kind']=='font' else None
         return FileResponse(path,media_type=media,filename=item['name'],content_disposition_type='inline' if item['kind'] in ('image','font') else 'attachment')
@@ -278,15 +287,37 @@ def create_app(data_dir=None):
     class DataRead(BaseModel):
         source:str
         sheet:str|None=None
+        sheets:list[str]|None=None
         encoding:str='utf-8-sig'
         delimiter:str|None=None
+
+    def source_data(source,user,sheet=None,sheets=None,encoding='utf-8-sig',delimiter=None):
+        item=store.resource(source,user)
+        if item['kind']!='source':raise ValueError('INVALID_SOURCE')
+        path=Path(item['payload']['linked_path']) if item['payload'].get('linked_path') else store.root/'assets'/item['payload']['file']
+        return read_data(path,sheet,encoding,delimiter,sheets)
+
+    @app.post('/api/data/pick')
+    def pick_source(value:dict,user=Depends(current_user)):
+        from .native import pick_file
+        selected=pick_file()
+        if not selected:return {'cancelled':True}
+        path=Path(selected).resolve()
+        if path.suffix.lower() not in ('.xlsx','.xlsm','.xls','.csv','.tsv'):raise ValueError('UNSUPPORTED_DATA_FORMAT')
+        # Only an actual native dialog result can create a source; no arbitrary path API.
+        read_data(path)
+        ident=value.get('replace')
+        if ident:
+            old=store.resource(ident,user)
+            if old['owner']!=user['id'] or old['kind']!='source':raise PermissionError('OWNER_ONLY')
+        return store.save_resource(user,'source',path.name,{'linked_path':str(path),'size':path.stat().st_size,'live':True},'private',ident)
 
     @app.post('/api/data/read')
     def data_read(value:DataRead,user=Depends(current_user)):
         item=store.resource(value.source,user)
         if item['kind']!='source':
             raise ValueError('INVALID_SOURCE')
-        return read_data(store.root/'assets'/item['payload']['file'],value.sheet,value.encoding,value.delimiter)
+        return source_data(value.source,user,value.sheet,value.sheets,value.encoding,value.delimiter)
 
     @app.post('/api/formula')
     def formula(value:dict,user=Depends(current_user)):
@@ -296,38 +327,68 @@ def create_app(data_dir=None):
         document:Document
         row:dict=Field(default_factory=dict)
         page:int=Field(0,ge=0)
+        source:str|None=None
+        sheets:list[str]|None=None
+        record_index:int=Field(0,ge=0)
+        encoding:str='utf-8-sig'
+        delimiter:str|None=None
 
     @app.post('/api/preview')
     def preview(value:Preview,user=Depends(current_user)):
         if value.page>=len(value.document.pages):
             raise ValueError('PAGE_NOT_FOUND')
+        if value.source:
+            records=source_data(value.source,user,sheets=value.sheets,encoding=value.encoding,delimiter=value.delimiter)['records']
+            if value.record_index>=len(records):raise ValueError('SOURCE_RECORD_NO_LONGER_EXISTS')
+            value.row=records[value.record_index]
         row=apply_rules(value.row,value.document.rules,value.document.variables)
         image,meta=render_label(value.document.pages[value.page],row,assets_for(user))
-        return {'image':'data:image/png;base64,'+base64.b64encode(png_bytes(image)).decode(),**meta,'row':row}
+        return {'image':'data:image/png;base64,'+base64.b64encode(png_bytes(image)).decode(),**meta,'row':row,'source_row':value.row}
 
     @app.post('/api/export/png')
     def export_png(value:Preview,user=Depends(current_user)):
         if value.page>=len(value.document.pages):
             raise ValueError('PAGE_NOT_FOUND')
+        if value.source:
+            records=source_data(value.source,user,sheets=value.sheets,encoding=value.encoding,delimiter=value.delimiter)['records']
+            if value.record_index>=len(records):raise ValueError('SOURCE_RECORD_NO_LONGER_EXISTS')
+            value.row=records[value.record_index]
         row=apply_rules(value.row,value.document.rules,value.document.variables)
         image,meta=render_label(value.document.pages[value.page],row,assets_for(user))
         return Response(png_bytes(image),media_type='image/png',headers={'Content-Disposition':'attachment; filename="label.png"'})
 
     @app.post('/api/jobs')
     def print_job(value:PrintRequest,user=Depends(current_user)):
-        settings=store.settings()
-        if not value.simulation:
-            device=printer_status(settings)
-            if settings.connection=='usb' and not any(p['name']==settings.printer and p['supported'] for p in device['printers']):
-                raise ValueError('SELECT_SUPPORTED_PRINTER')
-            if device['state']=='offline':
-                raise ValueError(device['detail'])
-            if settings.connection=='wifi' and not settings.ip:
-                raise ValueError('SET_PRINTER_IP')
-            if any(p.kind=='heat-shrink' for d in value.documents for p in d.pages):
-                raise ValueError('HSE_PHYSICAL_MEDIA_REQUIRES_VALIDATED_PROFILE')
-        ident=jobs.create(user,value,settings)
-        return {'id':ident}
+        with app.state.operations:
+            if updater.busy or updater.snapshot().get('state')=='installing':raise ValueError('UPDATE_IN_PROGRESS')
+            settings=store.settings()
+            if value.source:
+                data=source_data(value.source,user,sheets=value.sheets,encoding=value.encoding,delimiter=value.delimiter)
+                value.records=data['records'][value.record_from:value.record_to]
+                if not value.records:raise ValueError('NO_RECORDS')
+            from .profiles import get_profile
+            profile=get_profile(settings.model)
+            if any(page.model!=settings.model for doc in value.documents for page in doc.pages) and not value.simulation:
+                raise ValueError('DESIGN_MODEL_DIFFERS_FROM_PRINTER')
+            if not value.simulation:
+                if settings.connection=='wifi' and profile['transport']=='raster':
+                    from .discovery import resolve
+                    settings=resolve(settings)
+                    if settings.ip!=store.settings().ip:store.save_settings(settings)
+                device=printer_status(settings)
+                if settings.connection=='usb' and not any(p['name']==settings.printer and p['supported'] for p in device['printers']):
+                    raise ValueError('SELECT_SUPPORTED_PRINTER')
+                if device['state'] in ('offline','error'):
+                    raise ValueError(device['detail'])
+                if settings.connection=='wifi' and profile['transport']=='raster' and not settings.ip:
+                    raise ValueError('SET_PRINTER_IP')
+                if any(p.kind=='heat-shrink' for d in value.documents for p in d.pages):
+                    raise ValueError('HSE_PHYSICAL_MEDIA_REQUIRES_VALIDATED_PROFILE')
+            if not value.simulation and profile['transport']=='raster':
+                if any(getattr(settings,key) not in profile['cuts'] for key in ('cut_between_pages','cut_end_record','cut_between_files','cut_end_file')):
+                    raise ValueError('UNSUPPORTED_CUT_FOR_MODEL')
+            ident=jobs.create(user,value,settings)
+            return {'id':ident}
 
     def job_for(ident,user):
         with store.connect() as db:
@@ -489,7 +550,64 @@ def create_app(data_dir=None):
             app.state.shutdown()
         return {'ok':True}
 
-    app.mount('/static',StaticFiles(directory=ROOT/'web'),name='static')
+    @app.get('/api/printer/discovery')
+    def discovery_status(user=Depends(admin)):
+        return discovery.snapshot()
+
+    @app.post('/api/printer/discovery')
+    def discover(value:dict,user=Depends(admin)):
+        settings=store.settings()
+        return discovery.start(str(value.get('subnet') or settings.discovery_subnet),str(value.get('mac') or ''),settings.printer_port)
+
+    @app.post('/api/printer/identify')
+    def identify(value:dict,user=Depends(admin)):
+        from .discovery import resolve,probe,usb_devices
+        settings=store.settings()
+        if settings.connection=='usb':return {'usb_devices':usb_devices(),'printer':printer_status(settings)}
+        settings=resolve(settings)
+        if not settings.ip:raise ValueError('SET_PRINTER_IP')
+        info=probe(settings.ip,port=settings.printer_port)
+        if settings.ip!=store.settings().ip:store.save_settings(settings)
+        return info
+
+    @app.post('/api/printer/preferences')
+    def printer_preferences(value:dict,user=Depends(admin)):
+        from .native import driver_preferences
+        settings=store.settings()
+        if not settings.printer:raise ValueError('SELECT_PRINTER')
+        driver_preferences(settings.printer);return {'ok':True}
+
+    @app.post('/api/printer/wifi-settings')
+    def wifi_settings(value:dict,user=Depends(admin)):
+        from .native import windows_settings
+        windows_settings();return {'ok':True}
+
+    def active_jobs():
+        with store.connect() as db:
+            return db.execute("SELECT count(*) FROM jobs WHERE state IN ('queued','running','waiting')").fetchone()[0]
+
+    @app.get('/api/updates')
+    def update_state(user=Depends(admin)):
+        return updater.snapshot()
+
+    @app.post('/api/updates/{action}')
+    def update_action(action:str,value:dict,user=Depends(admin)):
+        if action=='check':return updater.check(store.settings().update_prerelease)
+        if action=='install':
+            with app.state.operations:
+                if active_jobs():raise ValueError('ACTIVE_PRINT_JOBS')
+                store.audit(user['id'],'update.request')
+                return updater.install(store.settings().update_prerelease,store.backup,active_jobs)
+        if action=='software':return updater.software(str(value.get('url','')))
+        raise ValueError('UNKNOWN_UPDATE_ACTION')
+
+    @app.get('/api/software/download')
+    def software_download(user=Depends(admin)):
+        name=updater.snapshot().get('software_file')
+        if not name:raise KeyError('SOFTWARE_NOT_READY')
+        return FileResponse(updater.root/Path(name).name,filename=Path(name).name)
+
+    app.mount('/static' ,StaticFiles(directory=ROOT/'web'),name='static')
 
     @app.get('/')
     def index():

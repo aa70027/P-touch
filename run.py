@@ -18,7 +18,13 @@ def main():
     parser.add_argument('--no-browser',action='store_true')
     parser.add_argument('--stop',action='store_true')
     parser.add_argument('--wait',type=int,default=0)
+    parser.add_argument('--pick-file',type=Path)
     args=parser.parse_args()
+    if args.pick_file:
+        from labelstudio.native import file_dialog
+        import json
+        args.pick_file.write_text(json.dumps(file_dialog(),ensure_ascii=False),encoding='utf-8')
+        return
     # PyInstaller windowed mode has no stdout/stderr; keep all logging UTF-8 on disk.
     args.data_dir.mkdir(parents=True,exist_ok=True)
     if sys.stdout is None:
@@ -75,7 +81,7 @@ def main():
                     return
                 time.sleep(0.1)
         threading.Thread(target=open_ready,daemon=True).start()
-    app.state.store.audit('local','application.start',f'v1.0.0 port={port}')
+    app.state.store.audit('local','application.start',f'v{__import__("labelstudio").__version__} port={port}')
     try:
         server.run()
     finally:

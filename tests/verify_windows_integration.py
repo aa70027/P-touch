@@ -9,7 +9,7 @@ import winreg
 from win32com.shell import shell,shellcon
 
 root=Path(__file__).resolve().parents[1]
-setup=root/'release'/'CableLabelStudio-1.0.0-Setup.exe'
+setup=root/'release'/'CableLabelStudio-1.1.0-Setup.exe'
 key_name=r'Software\Microsoft\Windows\CurrentVersion\Uninstall\CableLabelStudio'
 desktop=Path(shell.SHGetFolderPath(0,shellcon.CSIDL_DESKTOPDIRECTORY,0,0))/'Cable Label Studio.lnk'
 start=Path(shell.SHGetFolderPath(0,shellcon.CSIDL_PROGRAMS,0,0))/'Cable Label Studio'

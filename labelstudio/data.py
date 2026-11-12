@@ -46,7 +46,7 @@ def access_drivers():
         return []
 
 
-def read_data(path, sheet=None, encoding='utf-8-sig', delimiter=None):
+def read_one(path, sheet=None, encoding='utf-8-sig', delimiter=None):
     path = Path(path)
     ext = path.suffix.lower()
     if ext in ('.csv', '.tsv'):
@@ -102,3 +102,39 @@ def read_data(path, sheet=None, encoding='utf-8-sig', delimiter=None):
                     records.append(dict(zip(headers, map(cell, row))))
             return {'columns': headers, 'records': records, 'sheets': tables, 'sheet': selected}
     raise ValueError('UNSUPPORTED_DATA_FORMAT')
+
+
+def read_data(path, sheet=None, encoding='utf-8-sig', delimiter=None, sheets=None):
+    path=Path(path)
+    try:
+        first=read_one(path,sheet,encoding,delimiter)
+        names=first.get('sheets',[])
+        selected=sheets if sheets is not None else [first.get('sheet')] if names else []
+        if names and not selected:
+            raise ValueError('SELECT_AT_LEAST_ONE_SHEET')
+        if any(name not in names for name in selected):
+            raise ValueError('SHEET_NOT_FOUND')
+        records=[];columns=[];counts={}
+        for name in dict.fromkeys(selected):
+            data=first if name==first.get('sheet') else read_one(path,name,encoding,delimiter)
+            counts[name]=len(data['records'])
+            for col in data['columns']:
+                if col not in columns:columns.append(col)
+            for row in data['records']:
+                # Never overwrite a user's actual _sheet column.
+                row=dict(row)
+                if '_sheet' in row:
+                    backup='_sheet_value';suffix=2
+                    while backup in row:
+                        backup=f'_sheet_value_{suffix}';suffix+=1
+                    row[backup]=row['_sheet']
+                    if backup not in columns:columns.append(backup)
+                row['_sheet']=name;records.append(row)
+            if len(records)>MAX_ROWS:raise ValueError('TOO_MANY_ROWS')
+        if names:
+            if '_sheet' not in columns:columns.append('_sheet')
+            return dict(columns=columns,records=records,sheets=names,selected_sheets=list(dict.fromkeys(selected)),sheet=selected[0],sheet_counts=counts)
+        return first|{'selected_sheets':[],'sheet_counts':{}}
+    except FileNotFoundError:raise ValueError('SOURCE_FILE_NOT_FOUND')
+    except PermissionError:raise ValueError('SOURCE_FILE_LOCKED_OR_DENIED')
+    except OSError as exc:raise ValueError('SOURCE_FILE_READ_ERROR:'+str(exc))

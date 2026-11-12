@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "checks": [
+    "frozen version, creator, project and MIT metadata",
+    "frozen multi-sheet reader preserves user columns and worksheet identity",
+    "frozen preview rereads externally saved workbook without upload",
+    "frozen additional-model renderer and driver capability metadata",
+    "frozen persistent update API and bundled native helper"
+  ]
+}

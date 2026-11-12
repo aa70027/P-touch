@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "checks": [
+    "real 1.0.0 app started with an isolated persistent dataset",
+    "native helper stops old service, installs and restarts new service",
+    "same-page update state/log report completion from restarted app",
+    "dataset and configured port survive; portable update does not change registration"
+  ]
+}
