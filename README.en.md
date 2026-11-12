@@ -94,3 +94,16 @@ The application stores data in `%LOCALAPPDATA%\CableLabelStudio`, with logs in `
 ## Validation status
 
 See `ACCEPTANCE.md` for software and installer checks. A physical PT-E550W and its Brother driver were unavailable on the build machine. Physical USB/Wi-Fi printing, actual sizes, half-cut/full-cut combinations and high-resolution results still require acceptance with the user's device. Access import needs verification with a real database and the matching driver. The program does not represent simulations or spool submission as verified physical output.
+
+## Required next update — recorded 2026-11-13
+
+These six requirements are accepted for the next update and are not yet part of version 1.0.0. The durable checklist and acceptance criteria are in [NEXT_UPDATE.md](NEXT_UPDATE.md).
+
+1. **Language must be the installer's first question.** Before any other question or step, show “زبان را انتخاب کنید / Select your language / اختر لغتك”. Display three separate buttons, “فارسی”, “English” and “العربية”, simultaneously rather than in a dropdown. Continue the wizard in the selected language.
+2. **Multi-sheet Excel import.** Discover and display all worksheets in a workbook. Allow one or several sheets to be selected and read for preview, field binding and printing, preserving each record's source sheet. The current release can select and read one sheet; importing/printing several sheets in one workflow is planned here.
+3. **Direct Windows Excel-file connection.** In addition to upload, use a Windows file picker to select and retain the real file path. Refresh and pre-print reads must load saved changes from that same file without another upload. Support changing the path and reporting missing, inaccessible or locked files. Unsaved in-memory Excel changes are not yet present in the file on disk.
+4. **Online updates from GitHub.** Compare the installed version with releases in this project's official repository, report new versions, and support downloading and installing an update. Show progress, logs, result reports and check/download/install errors on that same update page, while preserving user data.
+5. **Printer-model detection.** Identify Brother models over USB and Wi-Fi, with or without an installed printer driver. Display detected model, driver status and connection separately. Use the local Windows component for device/network operations; provide an installer detection option/tool when a browser-only approach is insufficient. An unreachable device must not be falsely identified or reported online.
+6. **Additional Brother models and software downloads.** Extend support to other Brother label-printer models using model-specific capabilities and profiles for tape width, resolution, cutting and connection type. Add model selection and downloads of compatible drivers/software from official Brother sources, with download status and errors.
+
+Keep all Persian, English and Arabic guides synchronized locally and on GitHub when implementing these requirements. They must remain marked planned until implemented and verified.

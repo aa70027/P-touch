@@ -49,3 +49,8 @@ The build uses PyInstaller and the Windows Framework C# compiler at `%WINDIR%\Mi
 `labelstudio/app.py`: local API and access checks; `store.py`: SQLite, accounts and resources; `formulas.py`: bounded expression evaluator; `render.py`: shared print/preview renderer; `printer.py`: PT-E550W raster encoding, TCP and Windows RAW; `jobs.py`: serial queue and record gates; `web/`: offline trilingual interface; `installer/Setup.cs`: offline install/repair/update/uninstall wizard; `tests/`: integration and protocol checks.
 
 The application is an independent project, not a Brother product. It uses its own `.label.json` document format; native P-touch `.lbx` import/export is not implemented.
+
+
+## Next update / آپدیت بعدی / التحديث التالي
+
+[Accepted six-point requirements / شش الزام ثبت‌شده / المتطلبات الستة](NEXT_UPDATE.md). These are planned for the next update and are not yet part of version 1.0.0. Full translated details are in all three guides.
