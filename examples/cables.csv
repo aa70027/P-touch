@@ -1,0 +1,9 @@
+﻿Rack,Port,Type,X,توضیح
+A01,01,Fiber,ready,رک اصلی
+A01,02,Copper,,رک اصلی
+A01,03,Fiber,ready,رک اصلی
+A01,04,Copper,,رک اصلی
+A01,05,Fiber,ready,رک پشتیبان
+A01,06,Copper,,رک پشتیبان
+A01,07,Fiber,ready,رک پشتیبان
+A01,08,Copper,,رک پشتیبان

@@ -1,0 +1,96 @@
+# Cable Label Studio — 1.0.0
+
+An offline Windows application with a browser interface for designing and submitting Brother PT-E550W labels. The local engine stores templates, files, uploads, accounts, rules and reports on this computer.
+
+## Installation and maintenance
+
+Run `CableLabelStudio-1.0.0-Setup.exe`. Choose English, Persian or Arabic, select New installation and choose a dedicated installation folder. The wizard displays progress, SHA-256 verification and a saved operation log. Launch the desktop or Start menu shortcut. The default URL is `http://127.0.0.1:8765` and no login is required initially.
+
+The package targets Windows 10/11 x64 and bundles Python. The wizard uses Windows .NET Framework 4.7.2 or later. Installation is per Windows user; choosing a protected installation folder may require appropriate Windows permissions. The application binds only to loopback, not the LAN.
+
+Re-run Setup or use the Start menu Maintenance shortcut for repair, update or uninstall. Repair replaces application files from the installer package. Upgrade by running a newer installer. An interrupted overlay restores previous application files. User data remains separate and is preserved during repair, update and uninstall. The portable ZIP runs by extracting it into a dedicated directory and opening `CableLabelStudio.exe`.
+
+## Printer connection
+
+In Settings choose USB and an installed Brother PT-E550W queue, or Wi-Fi and the printer IP address/TCP port (default 9100). USB requires the official Brother Windows driver. The application refuses RAW jobs for unrelated printer models. Changing the target IP in this application does not reconfigure the printer's own network interface.
+
+Driver installation, USB device presence, Windows queue state and TCP reachability are separate signals. A reachable TCP port does not establish tape readiness or prove physical print completion. No unsupported status-polling command is sent to the E550W.
+
+[Official Brother downloads](https://support.brother.com/g/b/downloadtop.aspx?c=us&lang=en&prod=e550weus)
+
+## Design and layout
+
+Layouts include general, cable flag, cable wrap, patch panel, faceplate, die-cut flag layout and terminal block. An additional heat-shrink layout is available for simulation; physical HSe tube printing is blocked until an appropriate media profile is validated.
+
+Select the actual installed tape width: 3.5, 6, 9, 12, 18 or 24 mm for TZe tape. A 24 mm tape has about 18 mm of printable width. Keep content inside the printable area; overflowing elements are rejected during preview and full preflight.
+
+Length may be manual or calculated from content. The requested length includes at least 2 mm of mechanical blank margin at each end; optional before/after margins may be set to zero but cannot remove that mechanical requirement. For auto length, each record can have a different physical length. Very short isolated labels may feed out to 24.5 mm because of cutter position. Length values are in millimetres; the rendered layout range is 4.4–1000 mm. The preview separately shows a conservative isolated-label output estimate.
+
+Choose standard 180×180 dpi or high 180×360 dpi. High mode improves one axis only. Mirror printing reverses the final raster once. Full-device tests are required to establish tape/firmware-specific dimensional accuracy and cutter behavior.
+
+Add text, images, lines, frames, QR codes or Code 128. Text settings include font, point size, bold, underline, alignment, direction and rotation. Persian/Arabic joining and bidirectional text are processed before rasterizing. Select a font with the required glyphs. Code 128 supports ASCII; use QR for Unicode content.
+
+Drag elements, use the numeric X/Y/W/H fields, or press arrow keys to move the selected element by 0.1 mm (Shift: 1 mm). Width zero automatically fits text. Increase the element frame or reduce font size if text overflows; the renderer does not silently clip text.
+
+Cable flag repeats the same data on two sides from one field. Configure the cable gap, separator text and separator line. Cable wrap repeats vertically according to the repetition count. Patch-panel and terminal-block layouts use cell count and pitch; `{#cell}` resolves to the one-based cell number. Die-cut flag is a printed layout on continuous tape: this cutter cannot create a shaped die-cut outline.
+
+In flag layouts the manual length field specifies each flag side; the preview shows the total including both sides and the cable gap. Manual patch-panel/terminal length must accommodate all cells and end margins; a longer manual length adds trailing blank space without changing cell pitch.
+
+Documents can contain multiple pages, each with its own elements, dimensions and page repetition. Save documents or reusable templates in the application. Export/import uses the project's `.label.json` format, not Brother's native `.lbx` format. Saved datasets are independent resources selected at printing time. Template and document files store layouts, rules and sample variables.
+
+## Images and fonts
+
+Upload PNG/JPG/JPEG/BMP/WEBP images or TTF/OTF fonts in Images & fonts. They remain in the library across restarts and can be selected in element properties. Each upload is limited to 50 MB. Only use fonts and images for which you have appropriate rights.
+
+## Excel, CSV and Access
+
+Upload XLSX, XLSM, XLS, CSV, TSV, MDB or ACCDB. Choose a worksheet or Access table, text encoding and delimiter as applicable, then read the source. The first spreadsheet/CSV row supplies column names; duplicate/blank column names are made unique. Excel formulas use the saved calculated values: recalculate and save the workbook in Excel before import. Macros are not executed.
+
+Access requires a 64-bit Microsoft Access Database Engine or Access Runtime ODBC driver. Diagnostics identifies missing drivers. The application does not silently install this prerequisite. Excel and CSV do not need Access or Microsoft Office installed.
+
+Imported source files are snapshots. Re-upload the original file to capture external changes. Reload source re-reads the stored snapshot with the chosen sheet/table settings. Save a dataset, use it in the designer and bind text with `{Rack}`, `{Port}` or any exact column name. Manual JSON arrays and inline record editing are also available. A dataset may contain up to 100,000 nonempty records; larger input is rejected rather than truncated. The grid shows a bounded preview; the complete imported dataset remains available to printing and export.
+
+## Rules and expressions
+
+Rules run from top to bottom. Each rule has an output field, condition, value expression and optional otherwise expression. Subsequent rules can reference previous output fields. Example: target `B`, condition `not EMPTY(COL("X"))`, value `'A'`; bind the desired text element to `{B}`.
+
+```text
+IF(EMPTY(COL("X")), "", "A")
+CONCAT(COL("Rack"), "-", PAD(COL("Port"), 2))
+COL("Type") == "Fiber"
+CONTAINS(LOWER(COL("Description")), "fiber")
+```
+
+Available functions: `COL`, `IF`, `EMPTY`, `CONCAT`, `PAD`, `UPPER`, `LOWER`, `TRIM`, `TEXT`, `NUMBER`, `LEN`, `REPLACE`, `CONTAINS`, `ROUND`, `AND`, `OR`, `NOT`. Arithmetic, comparisons and conditional expressions are supported. An element expression starts with `=`. Escape literal braces with `{{` and `}}`. The evaluator disallows arbitrary Python execution, attribute access, file access and loops.
+
+## Printing and cutting
+
+The Print dialog chooses copies of each page, copies of the complete files, all records or a record range, and optional additional saved files. The current design is first, followed by selected saved files. The per-page repetition setting multiplies the dialog's page-copy count. Each file copy traverses all selected documents and their records in order.
+
+Continuous mode submits all records without a manual gate. Confirm-each-record mode keeps the next record local until you click Next record or press Enter/Space on the Print queue page. The gate follows submission of the previous record, not a hardware-confirmed completion signal. USB gated records are separate spool jobs.
+
+Settings provides full, half or no cut between pages/copies, at record boundaries, between files and at the end of the final file. Priority is final-job boundary, file boundary, record boundary, then page boundary. Tape material and printer firmware may constrain the resulting combination; validate with your real cassette before production.
+
+Simulation is an explicit option and sends no data to a printer. It writes PNG and printer-specific PRN output, available in job details. Simulation never increases the real submission counter. A job is fully preflighted before queueing, including all record-dependent formulas and layouts. A single job is limited to 100,000 labels; split larger runs into batches.
+
+Cancel stops future sends; data already handed to Windows/the printer may still print. A connection failure never causes an automatic resend. After a crash, active jobs become Interrupted and require review before reprinting to avoid duplicates. History supports reprinting the saved job request after explicit review.
+
+## Accounts and visibility
+
+The initial local account is the administrator. Open its profile to set a username/password, then enable authentication in Settings. Passwords require at least eight characters and use Argon2 hashes. At least one active password-protected administrator is required before enabling login. The built-in account retains administrator capability for the no-login mode.
+
+There is no contractual user-count cap; practical capacity depends on the PC. Administrators manage users. Each user controls default sharing for templates, saved documents, images, fonts, datasets and uploaded sources. A resource may override that setting with Only me, All users or User default. Other users open shared resources as editable copies; only the owner can overwrite/delete the original.
+
+Administrators see all print jobs and aggregate reports. Ordinary users see their own jobs/reports. Private design resources are not automatically exposed just because another user is an administrator. Account password resets invalidate that account's sessions. Authentication-mode changes invalidate existing sessions.
+
+## Settings, logs, reports and backup
+
+Configure browser port, default language/width/quality, printer timeout, audit-retention days and startup at Windows sign-in. Save before restarting to apply a changed port. Startup uses the current Windows account's Run registry value, not a pre-login Windows service.
+
+Reports separate requested, submitted, simulated, failed, cancelled and interrupted activity by user/date range and export to CSV. Device-confirmed counts remain distinct and are not incremented without a reliable hardware signal.
+
+The application stores data in `%LOCALAPPDATA%\CableLabelStudio`, with logs in `logs`. Settings shows persistent audit events and technical log output. Full backup downloads a ZIP containing the SQLite database and uploaded assets. For restore: stop the app, back up the existing data directory, then extract the ZIP into the data directory. Backups contain account hashes and print data; keep them appropriately protected.
+
+## Validation status
+
+See `ACCEPTANCE.md` for software and installer checks. A physical PT-E550W and its Brother driver were unavailable on the build machine. Physical USB/Wi-Fi printing, actual sizes, half-cut/full-cut combinations and high-resolution results still require acceptance with the user's device. Access import needs verification with a real database and the matching driver. The program does not represent simulations or spool submission as verified physical output.

@@ -1,0 +1,31 @@
+{
+  "version": "1.0.0",
+  "date": "2026-11-13",
+  "timezone": "Asia/Tehran",
+  "unit_tests_passed": 63,
+  "package_checks_passed": 17,
+  "windows_integration_checks_passed": 3,
+  "physical_printer_tested": false,
+  "access_driver_available_on_build_host": false,
+  "native_installer_screenshot_verified": false,
+  "web_ui_verified": [
+    "fa",
+    "en",
+    "ar",
+    "desktop",
+    "narrow window",
+    "simulation",
+    "keyboard record gates",
+    "save file"
+  ],
+  "artifacts": {
+    "CableLabelStudio-1.0.0-Setup.exe": {
+      "bytes": 29142016,
+      "sha256": "c11ce401f7e8240656b35a3f052a5789811b15a182b4b6ebdbd2131d91dc7ba5"
+    },
+    "CableLabelStudio-1.0.0-Portable.zip": {
+      "bytes": 29099755,
+      "sha256": "0cd846e938bbf6f573ff832846629f471292329cc1257a05d52300b2d7bb2616"
+    }
+  }
+}

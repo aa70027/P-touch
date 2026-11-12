@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "checks": [
+    "per-user registration and real desktop/Start menu shortcuts",
+    "installed maintenance executable repairs its own installation",
+    "uninstall removes owned registration and shortcuts"
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "name": "نمونه کابل دیتاسنتر",
+  "pages": [
+    {
+      "name": "Cable flag",
+      "kind": "cable-flag",
+      "width": 24.0,
+      "length": 40.0,
+      "auto_length": false,
+      "margin_before": 2.0,
+      "margin_after": 2.0,
+      "quality": "standard",
+      "mirror": false,
+      "repeat": 1,
+      "separator": " | ",
+      "separator_line": true,
+      "cable_gap": 8.0,
+      "wrap_repeats": 2,
+      "cells": 6,
+      "pitch": 12.0,
+      "border": false,
+      "elements": [
+        {
+          "id": "text1",
+          "type": "text",
+          "x": 2.0,
+          "y": 4.0,
+          "w": 0.0,
+          "h": 6.0,
+          "text": "{Rack}-{Port}",
+          "font": "Segoe UI",
+          "size": 12.0,
+          "bold": false,
+          "underline": false,
+          "align": "center",
+          "direction": "auto",
+          "rotation": 0,
+          "asset": "",
+          "thickness": 0.2
+        },
+        {
+          "id": "type",
+          "type": "text",
+          "x": 2.0,
+          "y": 12.0,
+          "w": 0.0,
+          "h": 4.0,
+          "text": "{B}",
+          "font": "Segoe UI",
+          "size": 8.0,
+          "bold": false,
+          "underline": false,
+          "align": "center",
+          "direction": "auto",
+          "rotation": 0,
+          "asset": "",
+          "thickness": 0.2
+        }
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "target": "B",
+      "when": "not EMPTY(COL(\"X\"))",
+      "value": "'فیبر نوری'",
+      "otherwise": "'کابل مسی'"
+    }
+  ],
+  "variables": {
+    "Rack": "A01",
+    "Port": "01",
+    "X": "ready"
+  }
+}
