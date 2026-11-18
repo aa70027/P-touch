@@ -18,7 +18,7 @@ sys.path.insert(0,str(root))
 case=root/'.installer-qa'/('update-handoff-'+uuid.uuid4().hex[:8]);case.mkdir(parents=True)
 target=case/'program';data=case/'data';data.mkdir()
 old=root/'release'/'CableLabelStudio-1.0.0-Setup.exe'
-new=root/'release'/'CableLabelStudio-1.1.0-Setup.exe'
+new=root/'release'/'CableLabelStudio-1.1.1-Setup.exe'
 report={'passed':False,'checks':[]}
 key_name=r'Software\Microsoft\Windows\CurrentVersion\Uninstall\CableLabelStudio'
 def registry_snapshot():
@@ -49,18 +49,18 @@ try:
     else:raise AssertionError('Old application did not start')
     report['checks'].append('real 1.0.0 app started with an isolated persistent dataset')
     updates=data/'updates';updates.mkdir(exist_ok=True)
-    state=updates/'state.json';state.write_text(json.dumps({'state':'installing','target':'1.1.0','events':[]}),encoding='utf-8')
+    state=updates/'state.json';state.write_text(json.dumps({'state':'installing','target':'1.1.1','events':[]}),encoding='utf-8')
     helper=updates/'CableLabelStudio-Update.exe';shutil.copy2(root/'dist'/'CableLabelStudio'/'CableLabelStudio-Update.exe',helper)
     worker=subprocess.Popen([str(helper),str(new),str(target),str(data),str(state),str(updates/'install.log')],creationflags=subprocess.CREATE_NO_WINDOW)
     assert worker.wait(timeout=180)==0,(updates/'install.log').read_text(encoding='utf-8-sig')
     deadline=time.time()+45
     while time.time()<deadline:
         try:
-            if api('/health',port)['version']=='1.1.0':break
+            if api('/health',port)['version']=='1.1.1':break
         except Exception:time.sleep(.2)
     else:raise AssertionError('Updated app did not restart on the persisted port')
     status=api('/updates',port)
-    assert status['state']=='complete' and status['current']=='1.1.0',status
+    assert status['state']=='complete' and status['current']=='1.1.1',status
     assert 'Installation complete' in status['install_log']
     resources=api('/resources',port)
     assert any(r['name']=='survive-update' and r['payload']['records'][0]['Cable']=='A-01' for r in resources)

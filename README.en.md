@@ -1,10 +1,16 @@
-# Cable Label Studio — 1.1.0
+# Cable Label Studio — 1.1.1
+
+## Update error fixed in 1.1.1 — 2026-11-18
+
+The 1.1.0 Windows bundle omitted a certificate-policy PEM required by the build runtime. Creating the HTTPS context failed with `[Errno 2] No such file or directory` before contacting GitHub. Version 1.1.1 bundles that exact required policy; certificate and hostname verification remain enabled. Release checks now include a real GitHub HTTPS check from the frozen executable. Persistent error reports include the exception type, operation stage and technical traceback on the same update page.
+
+If the broken 1.1.0 updater cannot check releases, **download the 1.1.1 installer manually once and run Upgrade**. Maintenance preserves user data. Subsequent releases can be checked/downloaded through the repaired updater. Printer configuration and user label files did not cause this error.
 
 An offline Windows application with a browser interface for designing and submitting Brother PT-E550W labels. The local engine stores templates, files, uploads, accounts, rules and reports on this computer.
 
 ## Installation and maintenance
 
-Run `CableLabelStudio-1.1.0-Setup.exe`. Choose English, Persian or Arabic, select New installation and choose a dedicated installation folder. The wizard displays progress, SHA-256 verification and a saved operation log. Launch the desktop or Start menu shortcut. The default URL is `http://127.0.0.1:8765` and no login is required initially.
+Run `CableLabelStudio-1.1.1-Setup.exe`. Choose English, Persian or Arabic, select New installation and choose a dedicated installation folder. The wizard displays progress, SHA-256 verification and a saved operation log. Launch the desktop or Start menu shortcut. The default URL is `http://127.0.0.1:8765` and no login is required initially.
 
 The package targets Windows 10/11 x64 and bundles Python. The wizard uses Windows .NET Framework 4.7.2 or later. Installation is per Windows user; choosing a protected installation folder may require appropriate Windows permissions. The application binds only to loopback, not the LAN.
 

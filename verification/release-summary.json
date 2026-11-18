@@ -1,36 +1,15 @@
 {
-  "version": "1.1.0",
-  "date": "2026-11-13",
-  "timezone": "Asia/Tehran",
-  "creator": "Amir Rahimi",
-  "license": "MIT",
-  "unit_tests_passed": 90,
+  "version": "1.1.1",
+  "date": "2026-11-18",
+  "unit_tests_passed": 96,
   "package_checks_passed": 17,
   "windows_integration_checks_passed": 3,
   "native_update_handoff_checks_passed": 4,
-  "frozen_update_feature_checks_passed": 5,
+  "frozen_update_feature_checks_passed": 6,
+  "frozen_github_https_verified": true,
   "physical_printer_tested": false,
-  "access_driver_available_on_build_host": false,
-  "native_installer_screenshot_verified": false,
-  "native_file_picker_interactive_verified": false,
-  "web_ui_verified": [
-    "fa",
-    "en",
-    "ar",
-    "desktop",
-    "multi-sheet import",
-    "creator and project links",
-    "connection screen",
-    "GitHub release check and same-page status"
-  ],
-  "artifacts": {
-    "CableLabelStudio-1.1.0-Setup.exe": {
-      "bytes": 30193664,
-      "sha256": "0e22f42dd7702a3dd16ee00e100a01a06c2fe1fdaf1f89782801e6f3c2762a15"
-    },
-    "CableLabelStudio-1.1.0-Portable.zip": {
-      "bytes": 30146077,
-      "sha256": "b364c0115e578974168054ad849bfbac40763422229dc38ec93e4aff80a5f879"
-    }
-  }
+  "root_cause": "1.1.0 bundle omitted the HTTPS runtime certificate-policy PEM",
+  "tls_certificate_verification": true,
+  "tls_hostname_verification": true,
+  "artifact_note": "Local validation summary. Rebuilt public release artifacts have their own authoritative SHA256SUMS.txt."
 }

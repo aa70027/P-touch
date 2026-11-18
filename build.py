@@ -9,6 +9,7 @@ import subprocess
 import sys
 import zipfile
 from PIL import Image,ImageDraw
+from labelstudio.runtime_ssl import required_runtime_files
 
 ROOT=Path(__file__).resolve().parent
 
@@ -29,9 +30,17 @@ def main():
           '--hidden-import','uvicorn.protocols.http.h11_impl','--hidden-import','uvicorn.protocols.websockets.auto',
           '--hidden-import','uvicorn.lifespan.on','--hidden-import','pyodbc','--hidden-import','win32timezone',
           '--hidden-import','win32ui','--hidden-import','PIL.ImageWin','--hidden-import','win32com.shell.shell','--hidden-import','pythoncom','--hidden-import','PIL._imagingft','--hidden-import','qrcode','run.py']
+    # Some Python distributions require a certificate-policy PEM adjacent to ssl.py.
+    # Carry that exact policy into _MEIPASS; never bypass certificate verification.
+    runtime_files=required_runtime_files()
+    for file in runtime_files:
+        args[-1:-1]=['--add-data',str(file)+';.']
     if '--package-only' not in sys.argv:
         subprocess.run(args,check=True)
     app=ROOT/'dist'/'CableLabelStudio'
+    for file in runtime_files:
+        if not (app/'_internal'/file.name).is_file():
+            raise RuntimeError('HTTPS_RUNTIME_FILE_MISSING:'+file.name)
     compiler=Path(os.environ['WINDIR'])/'Microsoft.NET'/'Framework64'/'v4.0.30319'/'csc.exe'
     subprocess.run([str(compiler),'/nologo','/target:winexe','/platform:x64','/optimize+',
                     '/reference:System.Web.Extensions.dll','/out:'+str(app/'CableLabelStudio-Update.exe'),
@@ -49,7 +58,7 @@ def main():
                     dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(source,dest)
     python_license=Path(sys.base_prefix)/'LICENSE.txt'
     if python_license.exists():shutil.copy2(python_license,licenses/'Python-LICENSE.txt')
-    manifest={'product':'CableLabelStudio','version':'1.1.0','files':{}}
+    manifest={'product':'CableLabelStudio','version':'1.1.1','files':{}}
     for file in sorted(app.rglob('*')):
         if file.is_file() and file.name!='package-manifest.json':
             manifest['files'][file.relative_to(app).as_posix()]=hashlib.sha256(file.read_bytes()).hexdigest()
@@ -58,9 +67,9 @@ def main():
     with zipfile.ZipFile(payload,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as archive:
         for file in app.rglob('*'):
             if file.is_file():archive.write(file,file.relative_to(app).as_posix())
-    shutil.copy2(payload,out/'CableLabelStudio-1.1.0-Portable.zip')
+    shutil.copy2(payload,out/'CableLabelStudio-1.1.1-Portable.zip')
     compiler=Path(os.environ['WINDIR'])/'Microsoft.NET'/'Framework64'/'v4.0.30319'/'csc.exe'
-    setup=out/'CableLabelStudio-1.1.0-Setup.exe'
+    setup=out/'CableLabelStudio-1.1.1-Setup.exe'
     subprocess.run([str(compiler),'/nologo','/target:winexe','/platform:x64','/optimize+',
                     '/win32icon:'+str(art/'app.ico'),'/out:'+str(setup),
                     '/reference:System.Windows.Forms.dll','/reference:System.Drawing.dll',
@@ -68,10 +77,10 @@ def main():
                     '/reference:System.Web.Extensions.dll','/reference:Microsoft.CSharp.dll','/reference:System.Management.dll',
                     '/resource:'+str(payload)+',payload.zip',str(ROOT/'installer'/'Setup.cs')],check=True)
     checksums=[]
-    for file in (setup,out/'CableLabelStudio-1.1.0-Portable.zip'):
+    for file in (setup,out/'CableLabelStudio-1.1.1-Portable.zip'):
         checksums.append(hashlib.sha256(file.read_bytes()).hexdigest()+'  '+file.name)
     (out/'SHA256SUMS.txt').write_text('\n'.join(checksums)+'\n',encoding='utf-8')
-    print(json.dumps({'setup':str(setup),'portable':str(out/'CableLabelStudio-1.1.0-Portable.zip'),'files':len(manifest['files'])}))
+    print(json.dumps({'setup':str(setup),'portable':str(out/'CableLabelStudio-1.1.1-Portable.zip'),'files':len(manifest['files'])}))
 
 
 if __name__=='__main__':main()

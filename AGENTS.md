@@ -5,3 +5,5 @@ Read NEXT_UPDATE.md and all three README guides before planning a release. The s
 Keep Persian, English and Arabic guides synchronized locally and on GitHub. Read the pending physical-acceptance checklist before claiming model support is hardware-tested. Native Raster support is limited to documented models. Windows-driver transport leaves private media/cutter properties to that driver; do not promise direct RAW Wi-Fi or app-controlled cutter behavior for those profiles.
 
 Never publish runtime databases, external linked Excel paths, raw logs, credentials or machine-specific test directories. Source packaging is allowlisted. Keep software tests, loopback/mock tests, Windows integration and real physical printing clearly separated.
+
+For 1.1.1 and future packages, preserve required_runtime_files() in build.py and exercise a real HTTPS request from the frozen executable. Source-only HTTPS tests do not validate the standalone TLS runtime. Do not remove certificate policy or weaken TLS verification to fix packaging failures.

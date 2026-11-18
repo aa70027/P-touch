@@ -5,6 +5,7 @@
     "frozen multi-sheet reader preserves user columns and worksheet identity",
     "frozen preview rereads externally saved workbook without upload",
     "frozen additional-model renderer and driver capability metadata",
-    "frozen persistent update API and bundled native helper"
+    "frozen persistent update API and bundled native helper",
+    "real GitHub HTTPS release check succeeds inside frozen executable"
   ]
 }

@@ -5,6 +5,7 @@ not a publisher code signature. The native helper survives application shutdown.
 """
 import hashlib
 import json
+import logging
 import os
 from pathlib import Path
 import re
@@ -13,9 +14,11 @@ import subprocess
 import sys
 import threading
 import time
+import traceback
 from urllib.parse import urlparse
 from urllib.request import Request,urlopen
 from . import __version__
+from .runtime_ssl import verified_context
 
 REPO='aa70027/P-touch'
 API='https://api.github.com/repos/'+REPO+'/releases'
@@ -26,7 +29,7 @@ def version(value):
     return tuple(map(int,match.groups()[:3]))+(0 if match[4] else 1,match[4] or '')
 
 def request(url):
-    return urlopen(Request(url,headers={'User-Agent':'CableLabelStudio/'+__version__,'Accept':'application/vnd.github+json' if 'api.github.com' in url else '*/*'}),timeout=30)
+    return urlopen(Request(url,headers={'User-Agent':'CableLabelStudio/'+__version__,'Accept':'application/vnd.github+json' if 'api.github.com' in url else '*/*'}),timeout=30,context=verified_context())
 
 def release_info(prerelease=False):
     with request(API) as response:
@@ -60,7 +63,7 @@ def brother_url(url):
 class Updater:
     def __init__(self,root):
         self.root=Path(root)/'updates';self.root.mkdir(exist_ok=True)
-        self.path=self.root/'state.json';self.log=self.root/'install.log'
+        self.path=self.root/'state.json';self.log=self.root/'install.log';self.diagnostics=self.root/'diagnostics.log'
         self.lock=threading.RLock();self.busy=False
         if not self.path.exists():self.write(dict(state='idle',progress=0,events=[],error=None))
         state=self.snapshot()
@@ -71,6 +74,7 @@ class Updater:
 
     def write(self,values):
         with self.lock:
+            self.root.mkdir(parents=True,exist_ok=True)
             try:state=json.loads(self.path.read_text(encoding='utf-8-sig'))
             except (OSError,ValueError):state={}
             state.update(values);state['updated']=time.time()
@@ -94,6 +98,8 @@ class Updater:
                 state.update(state='error',error='UPDATED_VERSION_NOT_RUNNING')
             try:state['install_log']=self.log.read_text(encoding='utf-8-sig',errors='replace')[-100000:]
             except OSError:state['install_log']=''
+            try:state['diagnostic_log']=self.diagnostics.read_text(encoding='utf-8',errors='replace')[-100000:]
+            except OSError:state['diagnostic_log']=''
             return state
 
     def task(self,work):
@@ -103,7 +109,15 @@ class Updater:
         def run():
             try:work()
             except Exception as exc:
-                self.event(str(exc));self.write(dict(state='error',error=str(exc)))
+                logging.getLogger('labelstudio.updater').exception('Update operation failed')
+                stage=self.snapshot().get('state','unknown')
+                try:
+                    with self.lock:
+                        previous=self.diagnostics.read_text(encoding='utf-8') if self.diagnostics.exists() else ''
+                        self.diagnostics.write_text((previous+'\n'+time.strftime('%Y-%m-%d %H:%M:%S')+' '+stage+'\n'+traceback.format_exc())[-100000:],encoding='utf-8')
+                except OSError:
+                    pass
+                self.event(str(exc));self.write(dict(state='error',error=str(exc),error_type=type(exc).__name__,error_stage=stage))
             finally:
                 with self.lock:self.busy=False
         threading.Thread(target=run,daemon=True,name='application-update').start()
@@ -111,7 +125,7 @@ class Updater:
 
     def check(self,prerelease=False):
         def work():
-            self.write(dict(state='checking',progress=0,error=None));self.event('Checking '+REPO)
+            self.write(dict(state='checking',progress=0,error=None,error_type=None,error_stage=None));self.event('Checking '+REPO)
             info=release_info(prerelease)
             self.write(info|dict(state='available' if info['available'] else 'up_to_date',progress=100))
             self.event('Release check complete')

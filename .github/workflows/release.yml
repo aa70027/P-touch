@@ -1,0 +1,57 @@
+name: Windows release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - labelstudio/__init__.py
+      - .github/workflows/release.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: windows-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+          architecture: x64
+          cache: pip
+      - name: Install build dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Verify application and HTTPS regression tests
+        run: python -m pytest tests/test_core.py tests/test_update.py tests/test_https_runtime.py -q
+      - name: Build standalone Windows packages
+        run: python build.py
+      - name: Verify real HTTPS inside the frozen application
+        run: python tests/verify_package_update.py
+      - name: Package source and checksums
+        run: python package_source.py
+      - name: Publish versioned release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_REPOSITORY: ${{ github.repository }}
+          RELEASE_COMMIT: ${{ github.sha }}
+        shell: pwsh
+        run: |
+          $releaseVersion = python -c "from labelstudio import __version__; print(__version__)"
+          $releaseTag = "v$releaseVersion"
+          gh release create $releaseTag `
+            "release/CableLabelStudio-$releaseVersion-Setup.exe" `
+            "release/CableLabelStudio-$releaseVersion-Portable.zip" `
+            "release/CableLabelStudio-$releaseVersion-Source.zip" `
+            release/SHA256SUMS.txt README.fa.md README.en.md README.ar.md `
+            --repo $env:RELEASE_REPOSITORY --target $env:RELEASE_COMMIT `
+            --title "Cable Label Studio $releaseVersion · Amir Rahimi" `
+            --notes-file RELEASE_NOTES.md --latest

@@ -74,3 +74,7 @@ The supplied executable is unsigned; no code-signing identity was available. Nat
 - Separate Direct/Infrastructure setup guides and Windows Wi-Fi settings action. Password entry and wireless association remain in the printer/Windows UI.
 
 The 1.1.0 software suite includes 63 existing and 27 new cases (90 passed). Windows package checks cover 17 install/runtime/repair/update/uninstall cases, plus the real per-user registration/shortcut and native update-handoff checks recorded in the public release summary. Browser inspection covers the three locales, multi-sheet selection and update/connection screens. Public summaries contain no runtime paths or raw logs.
+
+## Patch 1.1.1 — 2026-11-18
+
+The previous 1.1.0 release-check verification ran under source Python, while the frozen package smoke test only inspected the idle update API. It therefore missed a required certificate-policy PEM at the frozen ssl module location. The identical reported error was reproduced in the executable. Packaging now preserves the runtime certificate policy, and the frozen smoke test performs a live GitHub HTTPS release check. No certificate or hostname verification is bypassed. Detailed private diagnostics stay local and are not included in public source packages.

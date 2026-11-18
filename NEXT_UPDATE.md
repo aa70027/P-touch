@@ -36,3 +36,10 @@ Recorded and implemented: 2026-11-13 · Asia/Tehran
 See [فارسی](README.fa.md), [English](README.en.md), [العربية](README.ar.md) and [validation details](ACCEPTANCE.md).
 
 Repository: https://github.com/aa70027/P-touch
+
+## Patch 1.1.1 — 2026-11-18
+
+- [x] Reproduced the 1.1.0 frozen HTTPS failure and identified its missing certificate-policy runtime file.
+- [x] Bundle the exact required policy without disabling certificate or hostname verification.
+- [x] Add real frozen GitHub HTTPS checking and persistent detailed update diagnostics.
+- [x] Document one-time manual upgrade from the affected 1.1.0 installer in all three languages.

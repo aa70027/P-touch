@@ -1,4 +1,4 @@
-"""Smoke-test release 1.1.0 features using only the frozen application server."""
+"""Smoke-test release 1.1.1 features using only the frozen application server."""
 import io
 import json
 from pathlib import Path
@@ -32,7 +32,7 @@ try:
         except Exception:time.sleep(.2)
     else:raise AssertionError('Frozen app did not start')
     headers['X-CSRF-Token']=boot['csrf']
-    assert boot['version']=='1.1.0' and boot['creator']=='Amir Rahimi' and boot['license']=='MIT'
+    assert boot['version']=='1.1.1' and boot['creator']=='Amir Rahimi' and boot['license']=='MIT'
     checks.append('frozen version, creator, project and MIT metadata')
     rows=api('/api/data/read',{'source':item['id'],'sheets':['First','Second']})['records']
     assert len(rows)==2 and rows[0]['_sheet']=='First' and rows[0]['_sheet_value']=='also-keep' and rows[0]['_sheet_value_2']=='keep'
@@ -49,6 +49,16 @@ try:
     assert api('/api/updates')['state']=='idle'
     checks.append('frozen persistent update API and bundled native helper')
     assert (app.parent/'CableLabelStudio-Update.exe').is_file()
+    # Regression must exercise HTTPS from the frozen executable, not only from Python.
+    api('/api/updates/check',{})
+    deadline=time.time()+45
+    while time.time()<deadline:
+        status=api('/api/updates')
+        if status['state'] not in ('idle','checking'):break
+        time.sleep(.2)
+    assert status['state'] in ('available','up_to_date') and not status.get('error'),status
+    assert status.get('release',{}).get('version')
+    checks.append('real GitHub HTTPS release check succeeds inside frozen executable')
 finally:
     subprocess.run([str(app),'--data-dir',str(data),'--stop'],creationflags=subprocess.CREATE_NO_WINDOW,timeout=20)
     process.wait(timeout=20)
