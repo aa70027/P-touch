@@ -1,23 +1,27 @@
-**1.1.1 · Amir Rahimi · Free / رایگان / مجاني · MIT**
+**1.2.0 · Amir Rahimi · Free / رایگان / مجاني · MIT**
 
 ### فارسی
 
-خطای `[Errno 2] No such file or directory` هنگام بررسی آپدیت از بستهٔ اجرایی ۱٫۱٫۰ رفع شد. علت، جاافتادن فایل سیاست گواهی موردنیاز HTTPS در بستهٔ نصبی بود. بررسی گواهی و نام میزبان همچنان فعال است. گزارش خطا شامل نوع، مرحله و جزئیات فنی در همان صفحه ذخیره می‌شود.
-
-**اگر ۱٫۱٫۰ همین خطا را می‌دهد، این بار نصب‌کنندهٔ ۱٫۱٫۱ را دستی دانلود و در حالت ارتقا اجرا کنید.** اطلاعات کاربران حفظ می‌شود؛ سپس آپدیت‌های بعدی را از داخل برنامه بررسی کنید.
+- تنظیمات برش عمومی هنگام بازکردن چاپ خوانده می‌شوند؛ تغییرات برای هر فایل جدا ذخیره و در دفعات بعد فراخوانی می‌شوند.
+- چهار تنظیم برش برای هر فایل در پنجرهٔ چاپ قابل ویرایش‌اند؛ دکمهٔ بازگشت به تنظیمات عمومی نیز وجود دارد.
+- تیک اعداد فارسی برای پیش‌نمایش و چاپ متن، بدون تغییر دادهٔ اصلی، QR یا بارکد.
+- دکمه‌های وسط عرض نوار و وسط صفحه/خانه با اندازه‌گیری واقعی؛ دکمهٔ رفع جابه‌جایی در پیام خطای محدودهٔ چاپ.
+- انتخاب دوحالتهٔ رفتن به صف یا ماندن در صفحه؛ پیام کوتاه نتیجه و امکان تأیید رکورد بعد در همان طراح.
 
 ### English
 
-Fix the frozen 1.1.0 updater failing before contacting GitHub because a required HTTPS certificate-policy file was omitted. Preserve the runtime's certificate policy and keep certificate/hostname verification enabled. Persist exception type, stage and technical diagnostics on the update page. Release verification now performs a real GitHub HTTPS check from the standalone executable.
-
-Affected 1.1.0 users must download this installer manually once and choose Upgrade. User data is preserved. Subsequent updates can be checked through the repaired application.
+Persistent per-file cut overrides and inheritance, editable per-file policies in Print, page-level Persian digits after formula/data binding, measured element/group centering and a stay-in-designer option with short outcome notifications and inline record confirmation. Unsaved/shared designs with changed cuts become private copies; existing owned-file cut updates preserve other layout edits.
 
 ### العربية
 
-إصلاح خطأ فحص التحديث في حزمة ١٫١٫٠ بسبب غياب ملف سياسة شهادات HTTPS المطلوب. يبقى التحقق من الشهادة واسم المضيف مفعّلاً. تعرض صفحة التحديث نوع الخطأ ومرحلة العملية والتفاصيل التقنية المحفوظة.
+إعدادات قطع محفوظة لكل ملف مع وراثة الإعدادات العامة وتحريرها من نافذة الطباعة، وأرقام فارسية للنص، وتوسيط فعلي مع زر داخل رسالة الخطأ، وخيار البقاء في المصمم مع إشعارات النتيجة وتأكيد السجل التالي.
 
-إذا ظهر الخطأ في ١٫١٫٠، نزّل مثبّت ١٫١٫١ يدوياً مرة واحدة واختر الترقية؛ تُحفظ بيانات المستخدم، ثم يمكن فحص التحديثات اللاحقة من داخل التطبيق.
+User data is preserved during upgrade. Physical-printer/cutter acceptance remains separate. For Windows-driver profiles, the driver's private properties still control actual media/cutting. Submission notifications do not certify physical completion. Centering on an automatically sized page fixes its current length; width-only centering preserves automatic length. Oversized content produces an actionable error rather than silent resizing.
 
-96 software tests and the local Windows package/maintenance checks passed. The release build additionally checks GitHub HTTPS from its own frozen executable. Physical-printer acceptance remains separate. Executables are unsigned.
+The HTTPS runtime fix remains included. Affected 1.1.0 users can upgrade manually directly to this version; 1.1.1 users can use the in-app updater.
 
 [فارسی](https://github.com/aa70027/P-touch/blob/main/README.fa.md) · [English](https://github.com/aa70027/P-touch/blob/main/README.en.md) · [العربية](https://github.com/aa70027/P-touch/blob/main/README.ar.md)
+
+After an in-app upgrade, reload the browser page once (F5) to load the new interface. Inline record confirmation supports Ctrl+Enter.
+
+Validation: 119 Python tests, 12 Node UI-logic tests, 10 frozen-application checks, 17 installer checks, 4 update-handoff checks and 3 Windows integration checks passed locally. Browser visual inspection and physical printing were not validated.

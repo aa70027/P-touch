@@ -31,7 +31,9 @@ jobs:
       - name: Install build dependencies
         run: python -m pip install -r requirements-dev.txt
       - name: Verify application and HTTPS regression tests
-        run: python -m pytest tests/test_core.py tests/test_update.py tests/test_https_runtime.py -q
+        run: python -m pytest tests -q
+      - name: Verify print-dialog and inline notification behavior
+        run: node --test tests/printing_ui.test.cjs
       - name: Build standalone Windows packages
         run: python build.py
       - name: Verify real HTTPS inside the frozen application

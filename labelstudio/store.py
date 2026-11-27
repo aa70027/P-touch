@@ -141,6 +141,20 @@ class Store:
             db.execute('INSERT INTO sessions VALUES(?,?,?,?)', (hashlib.sha256(token.encode()).hexdigest(), row['id'], time.time()+43200, csrf))
             return token, csrf, self.public_user(dict(row))
 
+    def set_document_cuts(self,user,ident,cut_settings):
+        # Update only this field, atomically; do not overwrite unsaved/concurrent layout edits.
+        with self.connect() as db:
+            db.execute('BEGIN IMMEDIATE')
+            row=db.execute('SELECT * FROM resources WHERE id=?',(ident,)).fetchone()
+            if not row or not self.visible(row,user):raise KeyError('RESOURCE_NOT_FOUND')
+            if row['owner']!=user['id']:raise PermissionError('OWNER_ONLY')
+            if row['kind'] not in ('document','template'):raise ValueError('INVALID_DOCUMENT_RESOURCE')
+            payload=json.loads(row['payload'])
+            payload['cut_settings']=cut_settings.model_dump() if cut_settings else None
+            db.execute('UPDATE resources SET payload=?,updated=? WHERE id=?',(json.dumps(payload,ensure_ascii=False),time.time(),ident))
+        self.audit(user['id'],'document.cuts',ident)
+        return self.resource(ident,user)
+
     def session(self, token):
         with self.connect() as db:
             row = db.execute('SELECT * FROM sessions WHERE token=? AND expires>?', (hashlib.sha256(token.encode()).hexdigest(), time.time())).fetchone()

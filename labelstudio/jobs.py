@@ -26,7 +26,7 @@ def plan(request):
                         index+=1
                         end_record=pi==len(document.pages)-1 and copy==page.repeat*request.copies-1
                         end_file=end_record and ri==len(request.records)-1
-                        yield {'index':index,'total':total,'page':page,'row':row,'end_record':end_record,
+                        yield {'index':index,'total':total,'page':page,'row':row,'end_record':end_record,'cut_settings':document.cut_settings,
                                'end_file':end_file,'last':index==total,'document':document.name,'record':ri+1}
 
 
@@ -44,6 +44,10 @@ class JobQueue:
         total=0
         for step in plan(request):
             render_label(step['page'],step['row'],assets)
+            profile=get_profile(step['page'].model)
+            cut=cut_for(step['cut_settings'] or settings,step['end_record'],step['end_file'],step['last'])
+            if profile['transport']=='raster' and cut not in profile['cuts']:
+                raise ValueError('UNSUPPORTED_CUT_FOR_MODEL')
             total+=1
         ident=uuid.uuid4().hex
         payload={'request':request.model_dump(),'settings':settings.model_dump()}
@@ -113,7 +117,7 @@ class JobQueue:
                     return
                 page=step['page']
                 image,meta=render_label(page,step['row'],assets)
-                cut=cut_for(settings,step['end_record'],step['end_file'],step['last'])
+                cut=cut_for(step['cut_settings'] or settings,step['end_record'],step['end_file'],step['last'])
                 segment_last=step['last'] or (request.mode=='confirm' and step['end_record'])
                 native=get_profile(page.model)['transport']=='raster'
                 data=raster_page(image,page,cut,first,segment_last) if native else None

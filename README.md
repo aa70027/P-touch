@@ -8,16 +8,20 @@ Advanced local Windows label designer and printing software for Brother printers
 
 برنامج متقدم لتصميم الملصقات وطباعتها محلياً في Windows، بثلاث لغات، مع Excel متعدد الأوراق واتصال مباشر بالملف وتقارير وتحديثات GitHub.
 
-Version **1.1.1** fixes the packaged HTTPS updater error `[Errno 2]`. Install this patch manually once if upgrading from the affected 1.1.0 package; user data is preserved. TLS verification remains enabled.
+The HTTPS updater fix from **1.1.1** remains included. Users of the affected 1.1.0 package should manually install the current installer once; user data is preserved and TLS verification remains enabled.
 
-نسخهٔ **۱٫۱٫۱** خطای بررسی آپدیت را رفع می‌کند؛ برای خروج از نسخهٔ معیوب ۱٫۱٫۰، یک بار نصب‌کنندهٔ جدید را دستی اجرا کنید.
+اصلاح HTTPS نسخهٔ **۱٫۱٫۱** در نسخهٔ فعلی هم وجود دارد؛ کاربران نسخهٔ معیوب ۱٫۱٫۰ یک بار نصب‌کنندهٔ فعلی را دستی اجرا کنند.
+
+Version **1.2.0** adds persistent per-file cut policies, editable cuts in Print, Persian digits, measured centering and a stay-in-designer print mode with live status notifications.
+
+نسخهٔ **۱٫۲٫۰**: برش اختصاصی هر فایل، اعداد فارسی، وسط‌چین محتوا و ماندن در طراح همراه پیام نتیجهٔ چاپ.
 
 ## Download / دانلود / التنزيل
 
-- [Windows x64 installer](https://github.com/aa70027/P-touch/releases/download/v1.1.1/CableLabelStudio-1.1.1-Setup.exe)
-- [Portable ZIP](https://github.com/aa70027/P-touch/releases/download/v1.1.1/CableLabelStudio-1.1.1-Portable.zip)
-- [Editable source](https://github.com/aa70027/P-touch/releases/download/v1.1.1/CableLabelStudio-1.1.1-Source.zip)
-- [SHA-256 checksums](https://github.com/aa70027/P-touch/releases/download/v1.1.1/SHA256SUMS.txt)
+- [Windows x64 installer](https://github.com/aa70027/P-touch/releases/download/v1.2.0/CableLabelStudio-1.2.0-Setup.exe)
+- [Portable ZIP](https://github.com/aa70027/P-touch/releases/download/v1.2.0/CableLabelStudio-1.2.0-Portable.zip)
+- [Editable source](https://github.com/aa70027/P-touch/releases/download/v1.2.0/CableLabelStudio-1.2.0-Source.zip)
+- [SHA-256 checksums](https://github.com/aa70027/P-touch/releases/download/v1.2.0/SHA256SUMS.txt)
 
 Install the package, choose فارسی / English / العربية on the first screen and launch Cable Label Studio. The browser opens a loopback-only local app. No login is required initially; authentication can be enabled in Settings.
 
@@ -35,6 +39,6 @@ PT-E550W/P750W/P710BT use model-specific Raster profiles. P700, P900W, P950NW an
 
 ## Development
 
-Windows x64, Python 3.12. Create a virtual environment, install requirements-dev.txt and run `python run.py`. Run `python -m pytest tests/test_core.py tests/test_update.py -q`. Build offline packages with `python build.py`; package the allowlisted source with `python package_source.py`. No remote hosting service or cloud account is required for normal printing.
+Windows x64, Python 3.12. Create a virtual environment, install requirements-dev.txt and run `python run.py`. Run `python -m pytest tests -q` and `node --test tests/printing_ui.test.cjs`. Build offline packages with `python build.py`; package the allowlisted source with `python package_source.py`. No remote hosting service or cloud account is required for normal printing.
 
 User data: `%LOCALAPPDATA%\CableLabelStudio`. Installer maintenance preserves it. Linked Excel files remain external and require a separate backup. The executable is unsigned. Brother driver/software licenses are separate from this project's MIT license.

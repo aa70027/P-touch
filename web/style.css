@@ -4,3 +4,5 @@
 
 .credits{font-size:11px;line-height:1.9;margin-top:9px}.credits a{color:#e8b86a}.login .credits a{color:#1a6b60}.sheet-choices{display:flex;gap:16px;flex-wrap:wrap;margin-block:12px}.statusline{gap:12px;flex-wrap:wrap}.sidebar-footer{padding-top:14px}.credits b{unicode-bidi:isolate}.logs:empty{display:none}
 .sidebar .nav{min-height:0;overflow:auto}.sidebar-footer{flex-shrink:0}.nav button{padding:9px 15px}.brand{padding-bottom:22px}
+
+.print-cut-file{border:1px solid #d8e3df;border-radius:10px;padding:15px;margin:12px 0}.print-cut-file legend{font-weight:600;padding:0 7px}.print-cut-file .fieldgrid{margin-top:12px}.print-file-list{max-height:140px;overflow:auto}.after-print-switch{margin:20px 0}.segmented{display:flex;margin-top:9px;gap:0}.segmented button{flex:1;border-radius:0}.segmented button:first-child{border-start-start-radius:9px;border-end-start-radius:9px}.segmented button:last-child{border-start-end-radius:9px;border-end-end-radius:9px}.segmented button.active{background:#12796f;color:#fff;border-color:#12796f}.canvas-error{display:grid;justify-items:center;gap:15px}.canvas-error button{max-width:100%}#inline-print-status .notice{margin-bottom:14px}

@@ -6,6 +6,10 @@
     "frozen preview rereads externally saved workbook without upload",
     "frozen additional-model renderer and driver capability metadata",
     "frozen persistent update API and bundled native helper",
-    "real GitHub HTTPS release check succeeds inside frozen executable"
+    "real GitHub HTTPS release check succeeds inside frozen executable",
+    "frozen measured centering repairs out-of-page text and renders Persian digits",
+    "frozen file cuts save independently of general cuts and retain page digit preference",
+    "frozen multi-file job uses each file cut policy and exposes lightweight status",
+    "file-specific cuts and Persian digits survive a real process restart"
   ]
 }

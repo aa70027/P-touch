@@ -19,7 +19,7 @@ from pydantic import BaseModel, Field
 from PIL import Image
 from . import __version__
 from .store import Store, PASSWORDS, default_data_dir
-from .models import Settings, ResourceIn, Document, Label, PrintRequest, Element
+from .models import Settings, ResourceIn, Document, Label, PrintRequest, Element, CutSettings, CUT_FIELDS
 from .render import render_label, png_bytes, SYSTEM_FONTS
 from .formulas import apply_rules, evaluate
 from .jobs import JobQueue
@@ -210,6 +210,19 @@ def create_app(data_dir=None):
     def resources(kind:str|None=None,user=Depends(current_user)):
         return store.resources(user,kind)
 
+    @app.get('/api/printing/defaults')
+    def printing_defaults(user=Depends(current_user)):
+        from .profiles import get_profile
+        settings=store.settings()
+        return {'cut_settings':CutSettings.from_settings(settings).model_dump(),'profile':get_profile(settings.model)}
+
+    class DocumentCuts(BaseModel):
+        cut_settings:CutSettings|None
+
+    @app.patch('/api/resources/{ident}/cut-settings')
+    def document_cuts(ident:str,value:DocumentCuts,user=Depends(current_user)):
+        return store.set_document_cuts(user,ident,value.cut_settings)
+
     @app.post('/api/resources')
     def create_resource(value:ResourceIn,user=Depends(current_user)):
         payload=value.payload
@@ -333,6 +346,24 @@ def create_app(data_dir=None):
         encoding:str='utf-8-sig'
         delimiter:str|None=None
 
+    class Center(Preview):
+        element_id:str|None=None
+        axis:str='width'
+
+    @app.post('/api/design/center')
+    def center_design(value:Center,user=Depends(current_user)):
+        from .layout import center_label
+        if value.page>=len(value.document.pages):raise ValueError('PAGE_NOT_FOUND')
+        row=value.row
+        if value.source:
+            records=source_data(value.source,user,sheets=value.sheets,encoding=value.encoding,delimiter=value.delimiter)['records']
+            if value.record_index>=len(records):raise ValueError('SOURCE_RECORD_NO_LONGER_EXISTS')
+            row=records[value.record_index]
+        row=apply_rules(row,value.document.rules,value.document.variables)
+        label,meta=center_label(value.document.pages[value.page],row,assets_for(user),value.element_id,value.axis)
+        value.document.pages[value.page]=label
+        return {'document':value.document.model_dump(),**meta}
+
     @app.post('/api/preview')
     def preview(value:Preview,user=Depends(current_user)):
         if value.page>=len(value.document.pages):
@@ -385,7 +416,7 @@ def create_app(data_dir=None):
                 if any(p.kind=='heat-shrink' for d in value.documents for p in d.pages):
                     raise ValueError('HSE_PHYSICAL_MEDIA_REQUIRES_VALIDATED_PROFILE')
             if not value.simulation and profile['transport']=='raster':
-                if any(getattr(settings,key) not in profile['cuts'] for key in ('cut_between_pages','cut_end_record','cut_between_files','cut_end_file')):
+                if any(getattr(doc.cut_settings or settings,key) not in profile['cuts'] for doc in value.documents for key in CUT_FIELDS):
                     raise ValueError('UNSUPPORTED_CUT_FOR_MODEL')
             ident=jobs.create(user,value,settings)
             return {'id':ident}
@@ -396,6 +427,11 @@ def create_app(data_dir=None):
         if not row or (row['owner']!=user['id'] and user['role']!='admin'):
             raise KeyError('JOB_NOT_FOUND')
         return dict(row)
+
+    @app.get('/api/jobs/{ident}/status')
+    def print_status(ident:str,user=Depends(current_user)):
+        row=job_for(ident,user)
+        return {key:row[key] for key in ('id','state','total','sent','simulated','error','updated')}
 
     @app.get('/api/jobs')
     def list_jobs(user=Depends(current_user)):

@@ -2,6 +2,7 @@ import io
 import math
 import os
 import re
+import unicodedata
 from functools import lru_cache
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont, ImageOps, features
@@ -32,13 +33,18 @@ def text_options(text, direction):
     if not features.check_feature('raqm'):
         return {}
     if direction == 'auto':
-        direction = 'rtl' if re.search(r'[\u0600-\u08ff]', text) else 'ltr'
+        # Localized digits are not strong RTL letters. Respect the first strong
+        # character so "Rack-۱۲۳" retains the same reading order as "Rack-123".
+        strong=next((unicodedata.bidirectional(c) for c in text if unicodedata.bidirectional(c) in ('L','R','AL')),'L')
+        direction = 'rtl' if strong in ('R','AL') else 'ltr'
     return {'direction': direction}
 
 
-def element_image(element, row, assets):
+def element_image(element, row, assets, persian_digits=False):
     px = DPM * SCALE
     text = interpolate(element.text, row)
+    if persian_digits and element.type=='text':
+        text=to_persian_digits(text)
     w, h = round(element.w * px), max(1, round(element.h * px))
     if element.type == 'text':
         font = get_font(element.font, element.size, element.bold, assets)
@@ -135,6 +141,10 @@ def code128(text):
     return image
 
 
+def to_persian_digits(text):
+    return text.translate(str.maketrans('0123456789٠١٢٣٤٥٦٧٨٩','۰۱۲۳۴۵۶۷۸۹۰۱۲۳۴۵۶۷۸۹'))
+
+
 def render_label(label: Label, row: dict, assets):
     from .profiles import get_profile, printable as printable_mm
     profile=get_profile(label.model)
@@ -145,7 +155,7 @@ def render_label(label: Label, row: dict, assets):
     # Optional whitespace can be removed without pretending the cutter can reach the head.
     before=max(2,label.margin_before)
     after=max(2,label.margin_after)
-    rendered = [(e,element_image(e,row,assets)) for e in label.elements]
+    rendered = [(e,element_image(e,row,assets,label.persian_digits)) for e in label.elements]
     max_x = max([e.x + image.width/px for e,image in rendered] or [10])
     cell_length = max(4.4,before+max_x+after) if label.auto_length else label.length
     if label.kind in ('patch-panel', 'terminal-block'):
@@ -172,7 +182,7 @@ def render_label(label: Label, row: dict, assets):
         cell_row = row | {'#cell': index+1}
         for element,source in rendered:
             if label.kind in ('patch-panel','terminal-block'):
-                source = element_image(element,cell_row,assets)
+                source = element_image(element,cell_row,assets,label.persian_digits)
             x, y = round((before+element.x+ox)*px),round((element.y+oy)*px)
             if label.kind == 'cable-wrap':
                 # Repeat in the printable height with a consistent row spacing.
@@ -197,7 +207,7 @@ def render_label(label: Label, row: dict, assets):
         if label.separator:
             from .models import Element
             sep = Element(id='separator',text=label.separator,x=0,y=0,size=7,h=min(label.width-2,8),align='center')
-            part = element_image(sep,row,assets)
+            part = element_image(sep,row,assets,label.persian_digits)
             if part.width > label.cable_gap*px:
                 raise ValueError('SEPARATOR_TOO_WIDE')
             image.paste(part,(center-part.width//2,(height-part.height)//2))

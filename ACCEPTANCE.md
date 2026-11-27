@@ -78,3 +78,7 @@ The 1.1.0 software suite includes 63 existing and 27 new cases (90 passed). Wind
 ## Patch 1.1.1 — 2026-11-18
 
 The previous 1.1.0 release-check verification ran under source Python, while the frozen package smoke test only inspected the idle update API. It therefore missed a required certificate-policy PEM at the frozen ssl module location. The identical reported error was reproduced in the executable. Packaging now preserves the runtime certificate policy, and the frozen smoke test performs a live GitHub HTTPS release check. No certificate or hostname verification is bypassed. Detailed private diagnostics stay local and are not included in public source packages.
+
+## Release 1.2.0
+
+Tests cover persisted/reset per-file cuts without layout overwrites, user ownership, legacy defaults, mixed-file raster cut headers, immutable queued policies, data/formula digit localization with untouched QR/Code128 data, rotation-aware selected/group centering, stable automatic-length centering and useful oversized errors. JavaScript behavior tests cover private copies, snapshot inheritance, radio choices, staying in the editor, delayed success/failure, inline record confirmation and account-isolated notifications. Frozen package tests exercise the new routes, generated cut packets and persistence across an actual process restart. Browser/native visual checks are separate from these automated tests; physical output remains pending.

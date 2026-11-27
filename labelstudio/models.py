@@ -2,6 +2,7 @@ from typing import Literal
 from pydantic import BaseModel, Field, model_validator
 
 Cut = Literal['full', 'half', 'none']
+CUT_FIELDS = ('cut_between_pages','cut_end_record','cut_between_files','cut_end_file')
 KINDS = ['general', 'cable-flag', 'cable-wrap', 'patch-panel', 'faceplate', 'die-cut-flag', 'terminal-block', 'heat-shrink']
 TAPE = {3.5: (24, 52), 6: (32, 48), 9: (50, 39), 12: (70, 29), 18: (112, 8), 24: (128, 0)}
 
@@ -36,6 +37,7 @@ class Label(BaseModel):
     margin_after: float = Field(2, ge=0, le=127)
     quality: Literal['standard', 'high'] = 'standard'
     mirror: bool = False
+    persian_digits: bool = False
     repeat: int = Field(1, ge=1, le=10000)
     separator: str = Field(' | ', max_length=100)
     separator_line: bool = True
@@ -54,11 +56,24 @@ class Label(BaseModel):
         return self
 
 
+class CutSettings(BaseModel):
+    cut_between_pages: Cut = 'half'
+    cut_end_record: Cut = 'half'
+    cut_between_files: Cut = 'full'
+    cut_end_file: Cut = 'full'
+
+    @classmethod
+    def from_settings(cls,settings):
+        return cls(**{key:getattr(settings,key) for key in CUT_FIELDS})
+
+
 class Document(BaseModel):
     name: str = Field('Untitled', min_length=1, max_length=200)
     pages: list[Label] = Field(default_factory=lambda: [Label()], min_length=1, max_length=100)
     rules: list[dict] = Field(default_factory=list, max_length=100)
     variables: dict = Field(default_factory=dict)
+    # None deliberately inherits the current general settings at print time.
+    cut_settings: CutSettings | None = None
 
 
 class Settings(BaseModel):
@@ -117,6 +132,7 @@ class ResourceIn(BaseModel):
 
 
 class PrintRequest(BaseModel):
+    document_ids: list[str | None] | None = Field(None,max_length=100)
     source: str | None = None
     sheets: list[str] | None = None
     encoding: str = 'utf-8-sig'
@@ -129,3 +145,9 @@ class PrintRequest(BaseModel):
     file_copies: int = Field(1, ge=1, le=10000)
     mode: Literal['continuous', 'confirm'] = 'continuous'
     simulation: bool = False
+
+    @model_validator(mode='after')
+    def valid_document_ids(self):
+        if self.document_ids is not None and len(self.document_ids)!=len(self.documents):
+            raise ValueError('DOCUMENT_IDS_MISMATCH')
+        return self

@@ -1,4 +1,4 @@
-"""Smoke-test release 1.1.1 features using only the frozen application server."""
+"""Smoke-test release 1.2.0 features using only the frozen application server."""
 import io
 import json
 from pathlib import Path
@@ -11,7 +11,7 @@ import uuid
 from openpyxl import Workbook,load_workbook
 root=Path(__file__).resolve().parents[1];sys.path.insert(0,str(root))
 from labelstudio.store import Store
-from labelstudio.models import Document,Label,Element
+from labelstudio.models import Document,Label,Element,CutSettings
 
 case=root/'.installer-qa'/('package-update-'+uuid.uuid4().hex[:8]);case.mkdir(parents=True)
 data=case/'data';source=case/'live.xlsx'
@@ -22,8 +22,8 @@ with socket.socket() as sock:sock.bind(('127.0.0.1',0));port=sock.getsockname()[
 app=root/'dist'/'CableLabelStudio'/'CableLabelStudio.exe'
 process=subprocess.Popen([str(app),'--data-dir',str(data),'--no-browser','--port',str(port)],creationflags=subprocess.CREATE_NO_WINDOW)
 headers={'X-Studio-Request':'1'};checks=[]
-def api(path,body=None):
-    request=urllib.request.Request(f'http://127.0.0.1:{port}'+path,data=json.dumps(body).encode() if body is not None else None,headers=headers|({'Content-Type':'application/json'} if body is not None else {}))
+def api(path,body=None,method=None):
+    request=urllib.request.Request(f'http://127.0.0.1:{port}'+path,data=json.dumps(body).encode() if body is not None else None,headers=headers|({'Content-Type':'application/json'} if body is not None else {}),method=method)
     with urllib.request.urlopen(request,timeout=30) as response:return json.load(response)
 try:
     end=time.time()+45
@@ -32,7 +32,7 @@ try:
         except Exception:time.sleep(.2)
     else:raise AssertionError('Frozen app did not start')
     headers['X-CSRF-Token']=boot['csrf']
-    assert boot['version']=='1.1.1' and boot['creator']=='Amir Rahimi' and boot['license']=='MIT'
+    assert boot['version']=='1.2.0' and boot['creator']=='Amir Rahimi' and boot['license']=='MIT'
     checks.append('frozen version, creator, project and MIT metadata')
     rows=api('/api/data/read',{'source':item['id'],'sheets':['First','Second']})['records']
     assert len(rows)==2 and rows[0]['_sheet']=='First' and rows[0]['_sheet_value']=='also-keep' and rows[0]['_sheet_value_2']=='keep'
@@ -59,6 +59,43 @@ try:
     assert status['state'] in ('available','up_to_date') and not status.get('error'),status
     assert status.get('release',{}).get('version')
     checks.append('real GitHub HTTPS release check succeeds inside frozen executable')
+    none=CutSettings(**{key:'none' for key in CutSettings.model_fields}).model_dump()
+    design=Document(name='saved-cuts',pages=[Label(persian_digits=True,elements=[Element(text='{Name}-123',y=22)])])
+    fixed=api('/api/design/center',{'document':design.model_dump(),'row':{'Name':'A'},'axis':'width','element_id':'text1'})['document']
+    assert fixed['pages'][0]['elements'][0]['y']<22
+    assert api('/api/preview',{'document':fixed,'row':{'Name':'A'}})['image'].startswith('data:image/png')
+    checks.append('frozen measured centering repairs out-of-page text and renders Persian digits')
+    saved=api('/api/resources',{'name':'saved-cuts','kind':'document','scope':'private','payload':fixed})
+    changed=api('/api/resources/'+saved['id']+'/cut-settings',{'cut_settings':none},'PATCH')
+    assert changed['payload']['pages'][0]['persian_digits']
+    assert changed['payload']['cut_settings']==none
+    assert api('/api/printing/defaults')['cut_settings']['cut_end_file']=='full'
+    checks.append('frozen file cuts save independently of general cuts and retain page digit preference')
+    second=Document(name='second',cut_settings=CutSettings(**{key:'full' for key in CutSettings.model_fields})).model_dump()
+    job=api('/api/jobs',{'documents':[changed['payload'],second],'records':[{'Name':'A'}],'simulation':True})
+    deadline=time.time()+30
+    while time.time()<deadline:
+        status=api('/api/jobs/'+job['id']+'/status')
+        if status['state'] in ('simulated','failed'):break
+        time.sleep(.1)
+    assert status['state']=='simulated' and status['simulated']==2,status
+    for number,expected in [(1,0),(2,64)]:
+        with urllib.request.urlopen(f'http://127.0.0.1:{port}/api/jobs/{job["id"]}/artifacts/{number}/prn') as response:raw=response.read()
+        assert raw[raw.index(b'\x1biM')+3]==expected
+    checks.append('frozen multi-file job uses each file cut policy and exposes lightweight status')
+    subprocess.run([str(app),'--data-dir',str(data),'--stop'],creationflags=subprocess.CREATE_NO_WINDOW,timeout=20)
+    process.wait(timeout=20)
+    process=subprocess.Popen([str(app),'--data-dir',str(data),'--no-browser','--port',str(port)],creationflags=subprocess.CREATE_NO_WINDOW)
+    deadline=time.time()+40
+    while time.time()<deadline:
+        try:
+            current=api('/api/resources')
+            if any(r['id']==saved['id'] for r in current):break
+        except Exception:time.sleep(.2)
+    else:raise AssertionError('Frozen application did not restart')
+    restored=next(r for r in current if r['id']==saved['id'])
+    assert restored['payload']['cut_settings']==none and restored['payload']['pages'][0]['persian_digits']
+    checks.append('file-specific cuts and Persian digits survive a real process restart')
 finally:
     subprocess.run([str(app),'--data-dir',str(data),'--stop'],creationflags=subprocess.CREATE_NO_WINDOW,timeout=20)
     process.wait(timeout=20)

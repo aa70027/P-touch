@@ -43,3 +43,13 @@ Repository: https://github.com/aa70027/P-touch
 - [x] Bundle the exact required policy without disabling certificate or hostname verification.
 - [x] Add real frozen GitHub HTTPS checking and persistent detailed update diagnostics.
 - [x] Document one-time manual upgrade from the affected 1.1.0 installer in all three languages.
+
+## Version 1.2.0 — 2026-11-27
+
+- [x] Fresh general cut defaults and persistent per-file overrides, with explicit reset to inheritance.
+- [x] Four editable boundary controls per selected file in Print; private-copy handling for shared/unsaved designs.
+- [x] Persian digit rendering after data/formulas, persisted per page without changing source/code payloads.
+- [x] Measured selected-element and error-group centering; actionable oversized/margin conflicts.
+- [x] Queue/stay destination, per-user browser preference, brief result toasts and inline confirmation/cancellation.
+
+Software tests distinguish queued/submitted/simulated results from physical printer completion.

@@ -7,3 +7,5 @@ Keep Persian, English and Arabic guides synchronized locally and on GitHub. Read
 Never publish runtime databases, external linked Excel paths, raw logs, credentials or machine-specific test directories. Source packaging is allowlisted. Keep software tests, loopback/mock tests, Windows integration and real physical printing clearly separated.
 
 For 1.1.1 and future packages, preserve required_runtime_files() in build.py and exercise a real HTTPS request from the frozen executable. Source-only HTTPS tests do not validate the standalone TLS runtime. Do not remove certificate policy or weaken TLS verification to fix packaging failures.
+
+For 1.2.0 and later, preserve per-document cut_settings=None inheritance and snapshot the displayed effective cut policies into each queued job. Keep digit conversion at rendering time without changing source rows, rules or encoded payloads. Run both Python and Node print-dialog tests. Preserve inline record confirmation and distinguish submission from physical completion.

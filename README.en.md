@@ -1,16 +1,35 @@
-# Cable Label Studio — 1.1.1
+# Cable Label Studio — 1.2.0
+
+## Version 1.2.0 — 2026-11-27
+
+**Per-file cuts:** Opening Print reads the current saved general policy. Files without an override inherit it; files with an override show their own saved policy. Edit all four boundaries—pages/copies, records, files and final file—in a separate section for each selected file. Starting print persists changed policies for their files. Use general settings removes the override so later prints inherit fresh defaults. A queued job holds a fixed snapshot; changing general settings mid-job cannot change its cuts. At a file boundary, the policy of the file being finished applies.
+
+Saving an owned file's cuts patches only that field and preserves other layout edits. A changed unsaved design or another user's shared file is saved as your private copy at submission. Cancelling the dialog discards its unconfirmed changes. Windows-driver profiles still leave actual cutter control to the Brother driver's properties; that existing limitation is unchanged.
+
+**Persian digits:** Enable Persian digits in text in Label properties. After binding data and evaluating formulas, human-readable text converts Latin and Arabic-Indic digits to ۰۱۲۳۴۵۶۷۸۹ in both preview and printing. Source Excel values, conditional rules, QR and barcode payloads remain unchanged. This page-level preference persists in documents/templates and JSON exports; disabling it restores the original digits.
+
+**Measured centering:** Position and size provides Center across tape width for the selected element and Center on page / cell for both axes. Measurement includes text, images and rotation. Page centering fixes the current automatic length so moving the content cannot move its center again; the button has an explanatory hint. Width-only centering preserves automatic length.
+
+Out-of-area preview errors include a Move content to the center of tape width button. It centers the content group while preserving relative spacing. If the group/frame is physically taller than the printable area, or saved margins prevent page centering, an actionable error asks for size/margin changes. Text is not silently shrunk or clipped.
+
+**Destination after sending:** The Print dialog offers two buttons: Print queue page or Stay on this page. The preference is remembered for the current user in that browser. Staying preserves the designer and selection, while a small five-second notification reports submission success, simulation completion, failure or cancellation. Submission success is not hardware-confirmed completion. Live status, cancellation and Next record remain available in the designer, including confirm-each-record mode. Status reconnection never resends print data.
+
+Install/upgrade using `CableLabelStudio-1.2.0-Setup.exe`, or the repaired in-app updater. The 1.1.1 HTTPS fix remains included. Users of the affected 1.1.0 package may manually upgrade directly to 1.2.0. Development additionally uses Node's built-in test runner for the print-dialog tests; the installed application does not require Node.
+
+In per-record confirmation mode, use the inline Next record button or `Ctrl+Enter` inside the designer. After an in-app upgrade, reload the browser page once with `F5` to load the new interface.
+
 
 ## Update error fixed in 1.1.1 — 2026-11-18
 
 The 1.1.0 Windows bundle omitted a certificate-policy PEM required by the build runtime. Creating the HTTPS context failed with `[Errno 2] No such file or directory` before contacting GitHub. Version 1.1.1 bundles that exact required policy; certificate and hostname verification remain enabled. Release checks now include a real GitHub HTTPS check from the frozen executable. Persistent error reports include the exception type, operation stage and technical traceback on the same update page.
 
-If the broken 1.1.0 updater cannot check releases, **download the 1.1.1 installer manually once and run Upgrade**. Maintenance preserves user data. Subsequent releases can be checked/downloaded through the repaired updater. Printer configuration and user label files did not cause this error.
+If the broken 1.1.0 updater cannot check releases, **download the current 1.2.0 installer manually once and run Upgrade**. Maintenance preserves user data. Subsequent releases can be checked/downloaded through the repaired updater. Printer configuration and user label files did not cause this error.
 
 An offline Windows application with a browser interface for designing and submitting Brother PT-E550W labels. The local engine stores templates, files, uploads, accounts, rules and reports on this computer.
 
 ## Installation and maintenance
 
-Run `CableLabelStudio-1.1.1-Setup.exe`. Choose English, Persian or Arabic, select New installation and choose a dedicated installation folder. The wizard displays progress, SHA-256 verification and a saved operation log. Launch the desktop or Start menu shortcut. The default URL is `http://127.0.0.1:8765` and no login is required initially.
+Run `CableLabelStudio-1.2.0-Setup.exe`. Choose English, Persian or Arabic, select New installation and choose a dedicated installation folder. The wizard displays progress, SHA-256 verification and a saved operation log. Launch the desktop or Start menu shortcut. The default URL is `http://127.0.0.1:8765` and no login is required initially.
 
 The package targets Windows 10/11 x64 and bundles Python. The wizard uses Windows .NET Framework 4.7.2 or later. Installation is per Windows user; choosing a protected installation folder may require appropriate Windows permissions. The application binds only to loopback, not the LAN.
 
