@@ -99,6 +99,9 @@ def create_app(data_dir=None):
             raise HTTPException(403,'ADMIN_ONLY')
         return user
 
+    from .status_routes import register_status_routes
+    register_status_routes(app,store,current_user)
+
     def assets_for(user):
         def resolve(ident,kind):
             resource=store.resource(ident,user)

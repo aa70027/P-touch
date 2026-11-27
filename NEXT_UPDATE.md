@@ -62,3 +62,13 @@ Software tests distinguish queued/submitted/simulated results from physical prin
 - [x] Five-copy USB/TCP byte-stream regressions, confirmation segments and partial-write abort checks.
 - [x] Record submitted per-page cutting policies without label content in technical logs.
 - [ ] Confirm the reported extra full cuts are resolved on the user device; the user reported Wi-Fi; physical acceptance remains required.
+
+## Development: standalone transfer and original Excel status
+
+- [x] Owner-only original XLSX/XLSM status editing with stable per-sheet IDs, optimistic concurrency, Windows writer locking, backup/history and literal status values.
+- [x] Persian/English/Arabic status UI and guides; simulation/submission never mark a record as physically complete.
+- [x] Two-record synthetic CSV/XLSX test data prepared. These are not real device backups.
+- [ ] Native conversion of the application design to a transferable Brother template and actual USB/Wi-Fi transfer through verified tooling.
+- [ ] Read edited device database values, associate them with stable IDs, preview conflicts and synchronize the original Excel.
+- [ ] Verify software-to-device and device-to-software changes with real PT-E550W data. Current printer is unreachable from the development environment and Brother transfer tools are absent.
+- [ ] Complete native/device integration before publishing a release claiming both directions are supported.

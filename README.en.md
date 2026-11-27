@@ -1,5 +1,13 @@
 # Cable Label Studio — 1.2.1
 
+## Development: original Excel print status
+
+This feature is in the development source and is not included in the public 1.2.1 installer. Open Data sources → Excel print status and select an owned original XLSX/XLSM file linked through the Windows picker. Uploaded copies cannot update the original. Provide a fixed, unique row ID within each sheet and a plain-text status column, for example `RecordID` and `PrintStatus`. Select sheets and columns, read the rows, mark selected IDs `OK` or enter a value, then save in the original Excel file.
+
+Close the workbook in Excel before writing. Only status cells are changed; a full original backup and an owner-only change history/download link are retained. Formula cells, VBA bytes, drawings and other opaque package parts are preserved. Protected sheets, digitally signed workbooks, duplicate/missing/formula IDs and formula status columns are rejected. A workbook changed since inspection rejects the whole update and requires refresh/review. Legacy XLS needs conversion in Excel. The application does not calculate dependent formulas; Excel recalculates on opening.
+
+Statuses are manual acknowledgements. A print submission or simulation never automatically sets `OK`. The UI explicitly shows the printer as not synchronized. Native PT-E550W template transfer and retrieval of edited device cells are not implemented/verified. A Brother backup is not an editable Excel/CSV export. Continuing the device path requires official Brother tools and access to the printer or genuine before/after backups of a one-cell edit. `examples/device-status-sample.csv` contains two synthetic test records; it is not a real device backup.
+
 ## Cut-command and USB transmission patch 1.2.1 — 2026-11-27
 
 Final full cutting now uses the independent no-chain/end-of-strip feed-and-cut control. Selecting a final full cut no longer enables full-cut-each-label mode; cut-each-one is sent only for an explicit intermediate full cut. The shared encoder change applies to both USB and Wi-Fi.

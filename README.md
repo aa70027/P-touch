@@ -44,3 +44,5 @@ PT-E550W/P750W/P710BT use model-specific Raster profiles. P700, P900W, P950NW an
 Windows x64, Python 3.12. Create a virtual environment, install requirements-dev.txt and run `python run.py`. Run `python -m pytest tests -q` and `node --test tests/printing_ui.test.cjs`. Build offline packages with `python build.py`; package the allowlisted source with `python package_source.py`. No remote hosting service or cloud account is required for normal printing.
 
 User data: `%LOCALAPPDATA%\CableLabelStudio`. Installer maintenance preserves it. Linked Excel files remain external and require a separate backup. The executable is unsigned. Brother driver/software licenses are separate from this project's MIT license.
+
+Development source includes manual status editing in original linked Excel workbooks. Standalone PT-E550W template conversion/transfer and device-to-Excel status readback remain pending; the public 1.2.1 installer does not contain this development feature. See NEXT_UPDATE.md.
