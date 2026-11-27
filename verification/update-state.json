@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "checks": [
+    "real Windows sharing lock recovers with atomic old/new states",
+    "persistent destination failure remains explicit and cleans temporary state"
+  ]
+}

@@ -20,10 +20,10 @@ Version **1.2.0** adds persistent per-file cut policies, editable cuts in Print,
 
 ## Download / دانلود / التنزيل
 
-- [Windows x64 installer](https://github.com/aa70027/P-touch/releases/download/v1.3.0/CableLabelStudio-1.3.0-Setup.exe)
-- [Portable ZIP](https://github.com/aa70027/P-touch/releases/download/v1.3.0/CableLabelStudio-1.3.0-Portable.zip)
-- [Editable source](https://github.com/aa70027/P-touch/releases/download/v1.3.0/CableLabelStudio-1.3.0-Source.zip)
-- [SHA-256 checksums](https://github.com/aa70027/P-touch/releases/download/v1.3.0/SHA256SUMS.txt)
+- [Windows x64 installer](https://github.com/aa70027/P-touch/releases/download/v1.3.1/CableLabelStudio-1.3.1-Setup.exe)
+- [Portable ZIP](https://github.com/aa70027/P-touch/releases/download/v1.3.1/CableLabelStudio-1.3.1-Portable.zip)
+- [Editable source](https://github.com/aa70027/P-touch/releases/download/v1.3.1/CableLabelStudio-1.3.1-Source.zip)
+- [SHA-256 checksums](https://github.com/aa70027/P-touch/releases/download/v1.3.1/SHA256SUMS.txt)
 
 Install the package, choose فارسی / English / العربية on the first screen and launch Cable Label Studio. The browser opens a loopback-only local app. No login is required initially; authentication can be enabled in Settings.
 
@@ -41,8 +41,10 @@ PT-E550W/P750W/P710BT use model-specific Raster profiles. P700, P900W, P950NW an
 
 ## Development
 
-Windows x64, Python 3.12. Create a virtual environment, install requirements-dev.txt and run `python run.py`. Run `python -m pytest tests -q` and `node --test tests/printing_ui.test.cjs`. Build offline packages with `python build.py`; package the allowlisted source with `python package_source.py`. No remote hosting service or cloud account is required for normal printing.
+Windows x64, Python 3.12. Create a virtual environment, install requirements-dev.txt and run `python run.py`. Run `python -m pytest tests -q` and `node --test tests/printing_ui.test.cjs tests/status_ui.test.cjs tests/standalone_ui.test.cjs tests/editor_ui.test.cjs`. Build offline packages with `python build.py`; package the allowlisted source with `python package_source.py`. No remote hosting service or cloud account is required for normal printing.
 
 User data: `%LOCALAPPDATA%\CableLabelStudio`. Installer maintenance preserves it. Linked Excel files remain external and require a separate backup. The executable is unsigned. Brother driver/software licenses are separate from this project's MIT license.
 
 Version **1.3.0** adds original XLSX/XLSM status editing, reviewed CSV exchange with conflict detection, experimental static-image LBX packages and handoff to official Brother transfer tools. Automatic retrieval of edited device database cells is unsupported; proprietary printer backups are not CSV imports.
+
+Version **1.3.1** adds independent designer panes, per-account collapsible property cards, retained scroll positions and five localized icon commands beside the language selector. The redundant designer heading/description are removed. Direct compilation/transfer of a field-bound template and CSV without other software remains incomplete; official mobile SDK transfer expects Transfer Manager-created BLF/PDZ. No direct-transfer implementation or hardware success is claimed.

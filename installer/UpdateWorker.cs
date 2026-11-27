@@ -39,7 +39,23 @@ class UpdateWorker {
         return result;
     }
     static void SaveState(string path,string text){
-        string temporary=path+".worker.tmp";File.WriteAllText(temporary,text,new UTF8Encoding(false));
-        if(File.Exists(path))File.Replace(temporary,path,null);else File.Move(temporary,path);
+        string temporary=path+".worker."+Guid.NewGuid().ToString("N")+".tmp";
+        try{
+            File.WriteAllText(temporary,text,new UTF8Encoding(false));
+            // Windows readers/scanners may briefly deny delete sharing. Retain the
+            // old complete state and retry the atomic replacement, never delete it.
+            for(int attempt=0;;attempt++){
+                try{
+                    if(File.Exists(path))File.Replace(temporary,path,null);else File.Move(temporary,path);
+                    break;
+                }catch(IOException ex){
+                    int code=ex.HResult&0xffff;
+                    if(attempt>=49||(code!=32&&code!=33&&code!=1175&&code!=1176))throw;
+                    Thread.Sleep(100);
+                }
+            }
+        }finally{
+            try{if(File.Exists(temporary))File.Delete(temporary);}catch{}
+        }
     }
 }

@@ -96,3 +96,9 @@ Source-only implementation: status Routes/API and UI manage manual acknowledgeme
 ## Release 1.3.0
 
 Original Excel status editing and CSV exchange are released software paths. Regressions cover three-way status conflicts, changed row content, stable-ID reordering, stale-preview rejection, idempotent application, malformed/foreign CSV and private exports/plans/backups. Native package checks validate ZIP/XML structure, 32-bit embedded BMP, exact preservation of rendered ink in standard/high quality, per-record mapping, bounded counts, private access and explicit tool-handoff states. These are format/software tests, not acceptance in the real P-touch Editor or device. LBX export is experimental. Automatic device database readback remains unsupported; proprietary backups are not parsed.
+
+## Release 1.3.1
+
+Node behavior checks load all shipped scripts in order and exercise localized toolbar accessibility, editor-only commands, removal of the old heading, preview/data grouping, scroll restoration across rerenders, persistent collapsed cards, account isolation and unavailable storage. These do not prove actual browser geometry. Computer Use was stopped because it could not reliably determine the browser URL to enforce its policy; no further UI input was attempted. Desktop/narrow-screen visual acceptance remains pending. Direct standalone template/database compilation and transfer is not implemented and must not be described as delivered.
+
+The native update-handoff test exposed transient Windows File.Replace failure after successful installation. UpdateWorker now retries only sharing/locking/replacement contention errors with a bounded wait, retains the prior complete state, and cleans its unique temporary file. A compiled C# probe exercises a real held Windows read handle and a persistent destination error.

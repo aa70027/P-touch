@@ -1,4 +1,18 @@
-# Cable Label Studio — 1.3.0
+# Cable Label Studio — 1.3.1
+
+## Version 1.3.1 — persistent designer panes and top toolbar
+
+Update completion now retries atomic state replacement across brief Windows sharing locks. Readers retain the complete previous state until replacement succeeds; persistent failures remain explicit.
+
+On desktop, the properties column scrolls independently while the central preview and data remain available. The center has its own scrolling for large datasets. Rerendering label settings preserves both pane scroll positions. Narrow screens use normal page flow.
+
+Click the Label properties, Elements or Selected element header to collapse/expand that card. Native summary controls support keyboard access. Each account's panel choices persist in this browser across rerenders.
+
+Print labels, Standalone printing, Save template, Save file and New are icon buttons beside the language selector. Hover shows the localized title; each has an accessible name. The large designer heading/description have been removed to raise the work area. The top toolbar remains visible while scrolling.
+
+**Incomplete requirement: direct template and CSV transfer with no other software.** This release does not implement it. Experimental static-image LBX preparation and official Brother tool handoff retain the 1.3.0 limits: CSV is not dynamically bound to the image templates. The official mobile SDK documents transfer of BLF/PDZ created by Transfer Manager; it does not provide a Windows compiler or a specification for creating field-bound binary packages. Independent compilation/transfer requires a validated implementation and actual device testing. A print-port write or prepared ZIP is not storage of a template/database in printer memory. Automatic device status readback is also unsupported.
+
+Reload with **Ctrl+F5** after upgrading. Software checks do not establish browser or hardware acceptance. Visual inspection could not be completed because browser control was stopped by the automation tool.
 
 ## Version 1.3.0 — original Excel status and standalone preparation
 
@@ -36,7 +50,7 @@ Out-of-area preview errors include a Move content to the center of tape width bu
 
 **Destination after sending:** The Print dialog offers two buttons: Print queue page or Stay on this page. The preference is remembered for the current user in that browser. Staying preserves the designer and selection, while a small five-second notification reports submission success, simulation completion, failure or cancellation. Submission success is not hardware-confirmed completion. Live status, cancellation and Next record remain available in the designer, including confirm-each-record mode. Status reconnection never resends print data.
 
-Install/upgrade using `CableLabelStudio-1.3.0-Setup.exe`, or the repaired in-app updater. The 1.1.1 HTTPS fix remains included. Users of the affected 1.1.0 package may manually upgrade directly to 1.2.0. Development additionally uses Node's built-in test runner for the print-dialog tests; the installed application does not require Node.
+Install/upgrade using `CableLabelStudio-1.3.1-Setup.exe`, or the repaired in-app updater. The 1.1.1 HTTPS fix remains included. Users of the affected 1.1.0 package may manually upgrade directly to 1.2.0. Development additionally uses Node's built-in test runner for the print-dialog tests; the installed application does not require Node.
 
 In per-record confirmation mode, use the inline Next record button or `Ctrl+Enter` inside the designer. After an in-app upgrade, reload the browser page once with `F5` to load the new interface.
 
@@ -51,7 +65,7 @@ An offline Windows application with a browser interface for designing and submit
 
 ## Installation and maintenance
 
-Run `CableLabelStudio-1.3.0-Setup.exe`. Choose English, Persian or Arabic, select New installation and choose a dedicated installation folder. The wizard displays progress, SHA-256 verification and a saved operation log. Launch the desktop or Start menu shortcut. The default URL is `http://127.0.0.1:8765` and no login is required initially.
+Run `CableLabelStudio-1.3.1-Setup.exe`. Choose English, Persian or Arabic, select New installation and choose a dedicated installation folder. The wizard displays progress, SHA-256 verification and a saved operation log. Launch the desktop or Start menu shortcut. The default URL is `http://127.0.0.1:8765` and no login is required initially.
 
 The package targets Windows 10/11 x64 and bundles Python. The wizard uses Windows .NET Framework 4.7.2 or later. Installation is per Windows user; choosing a protected installation folder may require appropriate Windows permissions. The application binds only to loopback, not the LAN.
 

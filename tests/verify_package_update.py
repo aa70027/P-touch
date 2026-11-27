@@ -1,5 +1,6 @@
-"""Smoke-test release 1.3.0 features using only the frozen application server."""
+"""Smoke-test release 1.3.1 features using only the frozen application server."""
 import io
+import re
 import csv
 import zipfile
 import json
@@ -34,8 +35,15 @@ try:
         except Exception:time.sleep(.2)
     else:raise AssertionError('Frozen app did not start')
     headers['X-CSRF-Token']=boot['csrf']
-    assert boot['version']=='1.3.0' and boot['creator']=='Amir Rahimi' and boot['license']=='MIT'
+    assert boot['version']=='1.3.1' and boot['creator']=='Amir Rahimi' and boot['license']=='MIT'
     checks.append('frozen version, creator, project and MIT metadata')
+    with urllib.request.urlopen(f'http://127.0.0.1:{port}/') as response:index=response.read().decode()
+    scripts=re.findall(r'<script defer src="([^"]+)"',index)
+    assert len(scripts)==7 and any('/editor.js?' in name for name in scripts)
+    for script in scripts:
+        with urllib.request.urlopen(f'http://127.0.0.1:{port}'+script) as response:assert response.status==200 and len(response.read())>100
+    checks.append('frozen package serves all seven UI modules including the designer toolbar and panels')
+
     rows=api('/api/data/read',{'source':item['id'],'sheets':['First','Second']})['records']
     assert len(rows)==2 and rows[0]['_sheet']=='First' and rows[0]['_sheet_value']=='also-keep' and rows[0]['_sheet_value_2']=='keep'
     checks.append('frozen multi-sheet reader preserves user columns and worksheet identity')

@@ -16,7 +16,7 @@ import urllib.request
 import uuid
 
 ROOT=Path(__file__).resolve().parents[1]
-SETUP=ROOT/'release'/'CableLabelStudio-1.3.0-Setup.exe'
+SETUP=ROOT/'release'/'CableLabelStudio-1.3.1-Setup.exe'
 REPORTS=ROOT/'verification'
 CASE=ROOT/'.installer-qa'/('case-'+uuid.uuid4().hex[:8])
 TARGET=CASE/'نصب آزمایشی'
@@ -84,7 +84,7 @@ def main():
                     log=(DATA/'stderr.log').read_text(encoding='utf-8') if (DATA/'stderr.log').exists() else ''
                     raise AssertionError('Packaged app did not start: '+log)
                 time.sleep(.25)
-        assert health['version']=='1.3.0'
+        assert health['version']=='1.3.1'
         boot=request('/bootstrap');csrf=boot['csrf']
         assert boot['user']['role']=='admin' and boot['auth_enabled'] is False
         record('packaged executable starts without Python on PATH')
@@ -179,7 +179,7 @@ def main():
     install('install',unrelated,expected=1)
     assert (unrelated/'keep.txt').read_text()=='keep'
     record('nonempty unrelated destination rejected')
-    report={'version':'1.3.0','verification_date':date.today().isoformat(),'test_directory':str(CASE),'checks':results,'passed':True}
+    report={'version':'1.3.1','verification_date':date.today().isoformat(),'test_directory':str(CASE),'checks':results,'passed':True}
     (REPORTS/'installer-results.json').write_text(json.dumps(report,indent=2,ensure_ascii=False),encoding='utf-8')
     print(json.dumps({'passed':True,'checks':len(results)},ensure_ascii=False))
 

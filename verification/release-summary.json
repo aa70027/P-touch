@@ -1,12 +1,12 @@
 {
-  "version": "1.3.0",
+  "version": "1.3.1",
   "date": "2026-11-28",
   "unit_tests_passed": 161,
-  "node_ui_logic_tests_passed": 26,
+  "node_ui_logic_tests_passed": 32,
   "package_checks_passed": 17,
   "windows_integration_checks_passed": 3,
   "native_update_handoff_checks_passed": 4,
-  "frozen_update_feature_checks_passed": 16,
+  "frozen_update_feature_checks_passed": 17,
   "frozen_github_https_verified": true,
   "browser_visual_inspection": false,
   "physical_printer_tested": false,
@@ -24,5 +24,10 @@
   "native_static_lbx_export_verified": true,
   "native_editor_acceptance_verified": false,
   "automatic_device_readback_supported": false,
-  "actual_device_transfer_verified": false
+  "actual_device_transfer_verified": false,
+  "atomic_update_state_checks_passed": 2,
+  "editor_pane_behavior_verified": true,
+  "editor_geometry_visual_verified": false,
+  "direct_template_database_transfer_implemented": false,
+  "browser_visual_note": "Computer Use stopped because the current browser URL could not be reliably determined for policy enforcement."
 }

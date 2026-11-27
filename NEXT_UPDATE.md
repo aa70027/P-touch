@@ -80,3 +80,15 @@ Software tests distinguish queued/submitted/simulated results from physical prin
 - [x] Discover/open installed official P-touch Editor, Transfer Manager and BRAdmin tools; explicit USB/Wi-Fi transfer steps and no false transfer acknowledgements.
 - [ ] Actual LBX acceptance in P-touch Editor and PT-E550W, free-slot/memory checks and physical output.
 - [ ] Automatic edited-cell retrieval from the printer. This remains unsupported; CSV import is the supported file-mediated return workflow and does not parse proprietary backups.
+
+## Version 1.3.1 — designer workspace
+
+- [x] Independent desktop inspector scrolling; preview/data share a separate pane and narrow screens retain normal flow.
+- [x] Preserve pane scrolling when label properties rerender.
+- [x] Accessible collapsible property cards, remembered per account/browser.
+- [x] Five localized, accessible icon commands beside language selection; remove redundant heading/description.
+- [ ] Direct generation and transfer of linked template/database without any other software. Research: official mobile transfer API accepts Transfer Manager-created BLF/PDZ; no validated standalone Windows converter or binary package specification available. Actual printer is unreachable from this host. This requirement is NOT delivered by 1.3.1.
+
+Sources: https://support.brother.com/g/s/es/htmldoc/mobilesdk/reference/android/printer.html#transfer and https://support.brother.com/g/s/es/dev/en/setting/transfer_file/index.html
+
+- [x] Retry atomic update state replacement under transient Windows reader/scanner contention without deleting the old state; preserve persistent error reporting.

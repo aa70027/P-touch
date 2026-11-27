@@ -2,6 +2,7 @@
   "passed": true,
   "checks": [
     "frozen version, creator, project and MIT metadata",
+    "frozen package serves all seven UI modules including the designer toolbar and panels",
     "frozen multi-sheet reader preserves user columns and worksheet identity",
     "frozen preview rereads externally saved workbook without upload",
     "frozen additional-model renderer and driver capability metadata",

@@ -15,3 +15,5 @@ For 1.2.1 and later, do not wrap individual native Raster labels in Windows Star
 Keep final-strip no-chain feed/cut separate from per-label auto-full-cut; ESC i A cut-each-one belongs only to explicit intermediate full cuts. Verify both USB and TCP five-copy streams and preserve no-cut and intermediate full-cut behavior.
 
 For 1.3.0 and later, preserve original-workbook edit guards and CSV three-way conflict checks. Native LBX output is experimental static images, not a dynamic database template. Never report a prepared package or opened Brother tool as transferred, and never report file-mediated CSV import as automatic printer database readback. Keep all three Node behavior suites and frozen status/native package smoke tests.
+
+For 1.3.1 and later, keep editor-only icon commands in the top toolbar, localized accessible titles, per-account collapsed panels and pane scroll restoration on rerenders. Run all four Node suites. Direct memory transfer without Brother tools is still incomplete; do not equate native image preparation with a field-bound template/database compiler or verified transfer.

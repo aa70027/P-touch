@@ -26,4 +26,6 @@ jobs:
       - name: Verify application, original Excel edits and Windows file locks
         run: python -m pytest tests -q
       - name: Verify print and status UI logic
-        run: node --test tests/printing_ui.test.cjs tests/status_ui.test.cjs tests/standalone_ui.test.cjs
+        run: node --test tests/printing_ui.test.cjs tests/status_ui.test.cjs tests/standalone_ui.test.cjs tests/editor_ui.test.cjs
+      - name: Verify atomic update state under Windows sharing locks
+        run: python tests/verify_update_state.py
