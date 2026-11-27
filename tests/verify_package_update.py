@@ -1,4 +1,4 @@
-"""Smoke-test release 1.2.0 features using only the frozen application server."""
+"""Smoke-test release 1.2.1 features using only the frozen application server."""
 import io
 import json
 from pathlib import Path
@@ -32,7 +32,7 @@ try:
         except Exception:time.sleep(.2)
     else:raise AssertionError('Frozen app did not start')
     headers['X-CSRF-Token']=boot['csrf']
-    assert boot['version']=='1.2.0' and boot['creator']=='Amir Rahimi' and boot['license']=='MIT'
+    assert boot['version']=='1.2.1' and boot['creator']=='Amir Rahimi' and boot['license']=='MIT'
     checks.append('frozen version, creator, project and MIT metadata')
     rows=api('/api/data/read',{'source':item['id'],'sheets':['First','Second']})['records']
     assert len(rows)==2 and rows[0]['_sheet']=='First' and rows[0]['_sheet_value']=='also-keep' and rows[0]['_sheet_value_2']=='keep'
@@ -79,10 +79,26 @@ try:
         if status['state'] in ('simulated','failed'):break
         time.sleep(.1)
     assert status['state']=='simulated' and status['simulated']==2,status
-    for number,expected in [(1,0),(2,64)]:
+    for number,expected in [(1,0),(2,0)]:
         with urllib.request.urlopen(f'http://127.0.0.1:{port}/api/jobs/{job["id"]}/artifacts/{number}/prn') as response:raw=response.read()
         assert raw[raw.index(b'\x1biM')+3]==expected
     checks.append('frozen multi-file job uses each file cut policy and exposes lightweight status')
+    # The user's reported batch: one page/record, five copies, half between,
+    # full only at the very end. Check wire headers and terminators, not counts alone.
+    chain=Document(cut_settings=CutSettings(cut_between_pages='half',cut_end_file='full')).model_dump()
+    batch=api('/api/jobs',{'documents':[chain],'records':[{}],'copies':5,'simulation':True})
+    deadline=time.time()+30
+    while time.time()<deadline:
+        status=api('/api/jobs/'+batch['id']+'/status')
+        if status['state'] in ('simulated','failed'):break
+        time.sleep(.1)
+    assert status['state']=='simulated' and status['simulated']==5,status
+    for number in range(1,6):
+        with urllib.request.urlopen(f'http://127.0.0.1:{port}/api/jobs/{batch["id"]}/artifacts/{number}/prn') as response:raw=response.read()
+        assert raw[raw.index(b'\x1biM')+3]==0
+        assert raw[raw.index(b'\x1biK')+3]==(8 if number==5 else 4)
+        assert raw[-1]==(0x1a if number==5 else 0x0c)
+    checks.append('frozen five-copy batch has four half-cut chained pages and only one final full-cut command')
     subprocess.run([str(app),'--data-dir',str(data),'--stop'],creationflags=subprocess.CREATE_NO_WINDOW,timeout=20)
     process.wait(timeout=20)
     process=subprocess.Popen([str(app),'--data-dir',str(data),'--no-browser','--port',str(port)],creationflags=subprocess.CREATE_NO_WINDOW)

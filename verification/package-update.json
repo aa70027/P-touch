@@ -10,6 +10,7 @@
     "frozen measured centering repairs out-of-page text and renders Persian digits",
     "frozen file cuts save independently of general cuts and retain page digit preference",
     "frozen multi-file job uses each file cut policy and exposes lightweight status",
+    "frozen five-copy batch has four half-cut chained pages and only one final full-cut command",
     "file-specific cuts and Persian digits survive a real process restart"
   ]
 }

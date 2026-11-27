@@ -94,7 +94,7 @@ def test_multifile_cut_order_and_job_snapshot(client):
     for number,cut in enumerate(cuts,1):
         raw=client.get(f'/api/jobs/{ident}/artifacts/{number}/prn').content
         offset=raw.index(b'\x1biM')+3
-        assert raw[offset]==(0x40 if cut=='full' else 0)
+        assert raw[offset]==(0x40 if cut=='full' and number<len(cuts) else 0)
         advanced=raw[raw.index(b'\x1biK')+3]
         assert bool(advanced&4)==(cut=='half')
 

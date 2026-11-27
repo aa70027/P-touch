@@ -1,27 +1,27 @@
-**1.2.0 · Amir Rahimi · Free / رایگان / مجاني · MIT**
+**1.2.1 · Amir Rahimi · Free / رایگان / مجاني · MIT**
 
 ### فارسی
 
-- تنظیمات برش عمومی هنگام بازکردن چاپ خوانده می‌شوند؛ تغییرات برای هر فایل جدا ذخیره و در دفعات بعد فراخوانی می‌شوند.
-- چهار تنظیم برش برای هر فایل در پنجرهٔ چاپ قابل ویرایش‌اند؛ دکمهٔ بازگشت به تنظیمات عمومی نیز وجود دارد.
-- تیک اعداد فارسی برای پیش‌نمایش و چاپ متن، بدون تغییر دادهٔ اصلی، QR یا بارکد.
-- دکمه‌های وسط عرض نوار و وسط صفحه/خانه با اندازه‌گیری واقعی؛ دکمهٔ رفع جابه‌جایی در پیام خطای محدودهٔ چاپ.
-- انتخاب دوحالتهٔ رفتن به صف یا ماندن در صفحه؛ پیام کوتاه نتیجه و امکان تأیید رکورد بعد در همان طراح.
+در موتور مشترک USB/وای‌فای، برش نهایی از برش خودکار هر لیبل جدا شد؛ پایان زنجیره دیگر فرمان برش کاملِ تک‌تک لیبل‌ها را فعال نمی‌کند.
+
+ارسال USB پیوسته دیگر برای هر لیبل صفحهٔ Windows جدا باز و بسته نمی‌کند؛ همهٔ نسخه‌های هر بخش در یک سند RAW می‌مانند. لاگ فنی، برش و مرزهای واقعی هر صفحهٔ ارسال‌شده را بدون متن لیبل ثبت می‌کند. آزمون پنج نسخه، چهار فرمان نیم‌برش و فقط یک برش کامل در پایان را بررسی می‌کند. علت قطعی و رفع فیزیکی برش اضافهٔ گزارش‌شده هنوز نیازمند تأیید دستگاه است.
 
 ### English
 
-Persistent per-file cut overrides and inheritance, editable per-file policies in Print, page-level Persian digits after formula/data binding, measured element/group centering and a stay-in-designer option with short outcome notifications and inline record confirmation. Unsaved/shared designs with changed cuts become private copies; existing owned-file cut updates preserve other layout edits.
+Separate final-strip feed/cut from full-cut-each-label in the shared USB/Wi-Fi encoder. Emit cut-each-one only for explicit intermediate full cuts.
+
+Remove per-label Windows page wrappers from continuous USB RAW transmission. Preserve one document per continuous or confirmed-record segment, and add per-page cut diagnostics without label text. Five-copy stream regression verifies four half-cut policies and only one final full cut. The exact physical cause and resolution of reported extra cuts remain unverified on hardware. Windows-driver media/cutter properties remain controlled by the official driver.
 
 ### العربية
 
-إعدادات قطع محفوظة لكل ملف مع وراثة الإعدادات العامة وتحريرها من نافذة الطباعة، وأرقام فارسية للنص، وتوسيط فعلي مع زر داخل رسالة الخطأ، وخيار البقاء في المصمم مع إشعارات النتيجة وتأكيد السجل التالي.
+فصل القطع الكامل الأخير عن القطع التلقائي لكل ملصق في مرمّز USB/Wi-Fi المشترك.
 
-User data is preserved during upgrade. Physical-printer/cutter acceptance remains separate. For Windows-driver profiles, the driver's private properties still control actual media/cutting. Submission notifications do not certify physical completion. Centering on an automatically sized page fixes its current length; width-only centering preserves automatic length. Oversized content produces an actionable error rather than silent resizing.
+إزالة حدود صفحات Windows الإضافية لكل ملصق من إرسال USB RAW المتواصل، مع الاحتفاظ بمستند واحد لكل مقطع وإضافة تشخيص القطع دون نص الملصق. يتحقق اختبار خمس نسخ من أربع سياسات نصف قطع وقطع كامل أخير. يبقى سبب القطع الزائد الفعلي وحله بحاجة إلى تأكيد الجهاز.
 
-The HTTPS runtime fix remains included. Affected 1.1.0 users can upgrade manually directly to this version; 1.1.1 users can use the in-app updater.
+All 1.2.0 features and the HTTPS updater fix are preserved. User data is preserved during upgrade. Reload the browser page once after upgrading.
 
 [فارسی](https://github.com/aa70027/P-touch/blob/main/README.fa.md) · [English](https://github.com/aa70027/P-touch/blob/main/README.en.md) · [العربية](https://github.com/aa70027/P-touch/blob/main/README.ar.md)
 
-After an in-app upgrade, reload the browser page once (F5) to load the new interface. Inline record confirmation supports Ctrl+Enter.
+Protocol references: [Brother Raster v1.02, cutter controls](https://download.brother.com/welcome/docp100064/cv_pte550wp750wp710bt_eng_raster_102.pdf), [Microsoft RAW page boundaries](https://learn.microsoft.com/en-us/windows/win32/printdocs/startdocprinter).
 
-Validation: 119 Python tests, 12 Node UI-logic tests, 10 frozen-application checks, 17 installer checks, 4 update-handoff checks and 3 Windows integration checks passed locally. Browser visual inspection and physical printing were not validated.
+Validation: 129 Python tests, 12 Node UI-logic tests, 11 frozen-application checks and 17 installer checks passed locally. Native maintenance integration remains separately validated (4 handoff and 3 registration/shortcut checks). Physical cutter output remains unverified.

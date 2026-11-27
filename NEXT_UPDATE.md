@@ -53,3 +53,12 @@ Repository: https://github.com/aa70027/P-touch
 - [x] Queue/stay destination, per-user browser preference, brief result toasts and inline confirmation/cancellation.
 
 Software tests distinguish queued/submitted/simulated results from physical printer completion.
+
+## Patch 1.2.1 — 2026-11-27
+
+- [x] Separate final-strip feed/cut from automatic full-cut-each-label in the shared USB/Wi-Fi encoder; emit cut-each-one only for intermediate full cuts.
+
+- [x] Preserve one RAW document per continuous USB segment without Windows page wrappers around each label.
+- [x] Five-copy USB/TCP byte-stream regressions, confirmation segments and partial-write abort checks.
+- [x] Record submitted per-page cutting policies without label content in technical logs.
+- [ ] Confirm the reported extra full cuts are resolved on the user device; the user reported Wi-Fi; physical acceptance remains required.

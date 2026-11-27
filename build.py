@@ -58,7 +58,7 @@ def main():
                     dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(source,dest)
     python_license=Path(sys.base_prefix)/'LICENSE.txt'
     if python_license.exists():shutil.copy2(python_license,licenses/'Python-LICENSE.txt')
-    manifest={'product':'CableLabelStudio','version':'1.2.0','files':{}}
+    manifest={'product':'CableLabelStudio','version':'1.2.1','files':{}}
     for file in sorted(app.rglob('*')):
         if file.is_file() and file.name!='package-manifest.json':
             manifest['files'][file.relative_to(app).as_posix()]=hashlib.sha256(file.read_bytes()).hexdigest()
@@ -67,9 +67,9 @@ def main():
     with zipfile.ZipFile(payload,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as archive:
         for file in app.rglob('*'):
             if file.is_file():archive.write(file,file.relative_to(app).as_posix())
-    shutil.copy2(payload,out/'CableLabelStudio-1.2.0-Portable.zip')
+    shutil.copy2(payload,out/'CableLabelStudio-1.2.1-Portable.zip')
     compiler=Path(os.environ['WINDIR'])/'Microsoft.NET'/'Framework64'/'v4.0.30319'/'csc.exe'
-    setup=out/'CableLabelStudio-1.2.0-Setup.exe'
+    setup=out/'CableLabelStudio-1.2.1-Setup.exe'
     subprocess.run([str(compiler),'/nologo','/target:winexe','/platform:x64','/optimize+',
                     '/win32icon:'+str(art/'app.ico'),'/out:'+str(setup),
                     '/reference:System.Windows.Forms.dll','/reference:System.Drawing.dll',
@@ -77,10 +77,10 @@ def main():
                     '/reference:System.Web.Extensions.dll','/reference:Microsoft.CSharp.dll','/reference:System.Management.dll',
                     '/resource:'+str(payload)+',payload.zip',str(ROOT/'installer'/'Setup.cs')],check=True)
     checksums=[]
-    for file in (setup,out/'CableLabelStudio-1.2.0-Portable.zip'):
+    for file in (setup,out/'CableLabelStudio-1.2.1-Portable.zip'):
         checksums.append(hashlib.sha256(file.read_bytes()).hexdigest()+'  '+file.name)
     (out/'SHA256SUMS.txt').write_text('\n'.join(checksums)+'\n',encoding='utf-8')
-    print(json.dumps({'setup':str(setup),'portable':str(out/'CableLabelStudio-1.2.0-Portable.zip'),'files':len(manifest['files'])}))
+    print(json.dumps({'setup':str(setup),'portable':str(out/'CableLabelStudio-1.2.1-Portable.zip'),'files':len(manifest['files'])}))
 
 
 if __name__=='__main__':main()

@@ -81,7 +81,7 @@ def test_model_recognition_and_physical_geometry(name):
     assert meta['resolution']==[profile['high_dpi'],profile['dpi']]
     assert abs(image.height-label.width*profile['dpi']/25.4)<1
     if profile['transport']=='raster':
-        packet=raster_page(image,label,'full')
+        packet=raster_page(image,label,'full',last=False)
         assert (b'\x1biA' in packet)==(name!='PT-P710BT')
     else:
         with pytest.raises(ValueError,match='WINDOWS_DRIVER_TRANSPORT_REQUIRED'):raster_page(image,label)

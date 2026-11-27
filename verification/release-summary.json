@@ -1,16 +1,22 @@
 {
-  "version": "1.2.0",
+  "version": "1.2.1",
   "date": "2026-11-27",
-  "unit_tests_passed": 119,
+  "unit_tests_passed": 129,
   "node_ui_logic_tests_passed": 12,
   "package_checks_passed": 17,
   "windows_integration_checks_passed": 3,
   "native_update_handoff_checks_passed": 4,
-  "frozen_update_feature_checks_passed": 10,
+  "frozen_update_feature_checks_passed": 11,
   "frozen_github_https_verified": true,
   "browser_visual_inspection": false,
   "physical_printer_tested": false,
   "tls_certificate_verification": true,
   "tls_hostname_verification": true,
-  "artifact_note": "Local validation summary. Rebuilt public release artifacts have their own authoritative SHA256SUMS.txt."
+  "artifact_note": "Local validation summary. Rebuilt public release artifacts have their own authoritative SHA256SUMS.txt.",
+  "usb_raw_batch_checks": true,
+  "wifi_loopback_batch_checks": true,
+  "final_cut_separate_from_per_label_autocut": true,
+  "reported_physical_transport": "wifi",
+  "reported_physical_cut_issue_resolved": false,
+  "physical_note": "The user reported extra full cuts on Wi-Fi. Shared encoder and USB spool corrections are software-tested; physical resolution remains unverified."
 }

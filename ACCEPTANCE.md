@@ -82,3 +82,9 @@ The previous 1.1.0 release-check verification ran under source Python, while the
 ## Release 1.2.0
 
 Tests cover persisted/reset per-file cuts without layout overwrites, user ownership, legacy defaults, mixed-file raster cut headers, immutable queued policies, data/formula digit localization with untouched QR/Code128 data, rotation-aware selected/group centering, stable automatic-length centering and useful oversized errors. JavaScript behavior tests cover private copies, snapshot inheritance, radio choices, staying in the editor, delayed success/failure, inline record confirmation and account-isolated notifications. Frozen package tests exercise the new routes, generated cut packets and persistence across an actual process restart. Browser/native visual checks are separate from these automated tests; physical output remains pending.
+
+## 1.2.1 RAW batch regression
+
+The five-copy request exercises the real JobQueue and Transport against an instrumented Windows spooler API: one RAW StartDoc, five unchanged WritePrinter blocks, four FF endings with half-cut/chain flags, one final Control-Z with full-cut/no-chain flags, one EndDoc, and no Windows page wrappers. TCP loopback verifies the exact concatenated byte stream. Confirmation gates and abort-without-resend on short writes are covered. This corrects redundant USB boundaries, but does not establish the physical cause or certify the reported cutting fault as resolved. No real print is issued by these tests.
+
+The shared encoder now uses no-chain feed/cut for a final full boundary without enabling full-cut-each-label. Cut-each-one is emitted only for intermediate full cuts. The six boundary regressions cover half/full/no cut at intermediate/final positions; end-to-end USB/TCP tests verify that no full-cut-each-label command is enabled anywhere in the five-copy half-cut strip. The user reported the physical issue over Wi-Fi; correction of that output still needs device verification.

@@ -132,6 +132,13 @@ class JobQueue:
                     if driver:transport.send_image(image,meta)
                     else:transport.send(data)
                     sent+=1
+                    if native:
+                        # No label text/data in diagnostics. Log the exact wire
+                        # policy selected for each submitted page, not just UI defaults.
+                        self.store.logger.info('print.raw job=%s page=%s/%s cut=%s first=%s segment_last=%s spool=%s mode=%02x advanced=%02x terminator=%02x',
+                                               ident,step['index'],step['total'],cut,first,segment_last,
+                                               getattr(transport,'job_id',None),data[data.index(b'\x1biM')+3],
+                                               data[data.index(b'\x1biK')+3],data[-1])
                 self.update(ident,sent=sent,simulated=simulated)
                 first=False
                 if segment_last and transport:

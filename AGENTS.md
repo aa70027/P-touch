@@ -9,3 +9,7 @@ Never publish runtime databases, external linked Excel paths, raw logs, credenti
 For 1.1.1 and future packages, preserve required_runtime_files() in build.py and exercise a real HTTPS request from the frozen executable. Source-only HTTPS tests do not validate the standalone TLS runtime. Do not remove certificate policy or weaken TLS verification to fix packaging failures.
 
 For 1.2.0 and later, preserve per-document cut_settings=None inheritance and snapshot the displayed effective cut policies into each queued job. Keep digit conversion at rendering time without changing source rows, rules or encoded payloads. Run both Python and Node print-dialog tests. Preserve inline record confirmation and distinguish submission from physical completion.
+
+For 1.2.1 and later, do not wrap individual native Raster labels in Windows StartPagePrinter/EndPagePrinter calls. The Raster stream owns its FF/Control-Z boundaries; one continuous or confirmed-record segment uses one RAW document. Keep five-copy USB/TCP stream regression and short-write abort coverage. A software trace cannot prove physical cutter behavior or identify the user's fault without device evidence.
+
+Keep final-strip no-chain feed/cut separate from per-label auto-full-cut; ESC i A cut-each-one belongs only to explicit intermediate full cuts. Verify both USB and TCP five-copy streams and preserve no-cut and intermediate full-cut behavior.

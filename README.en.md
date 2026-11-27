@@ -1,4 +1,12 @@
-# Cable Label Studio — 1.2.0
+# Cable Label Studio — 1.2.1
+
+## Cut-command and USB transmission patch 1.2.1 — 2026-11-27
+
+Final full cutting now uses the independent no-chain/end-of-strip feed-and-cut control. Selecting a final full cut no longer enables full-cut-each-label mode; cut-each-one is sent only for an explicit intermediate full cut. The shared encoder change applies to both USB and Wi-Fi.
+
+Previous RAW transmission opened and closed a Windows spool page around every label. The redundant page wrappers are removed: continuous copies now travel in one RAW document using Brother's own page boundaries. A confirmed-record pause still starts a separate segment. This corrects a suspect USB boundary; the exact cause of the user's extra physical cuts and mechanical output remain subject to device testing. Network transport sends the shared encoder output over one connection.
+
+For one page, one record and five copies: designer Page copies 1, print Copies of each page 5, Copies of each file 1, Continuous mode, Between pages/copies Half cut and At end of final file Full cut. Stream regression verifies four half-cut policies and one final full-cut policy; this does not certify physical printing. The technical log now records each submitted page's cut, index, segment boundaries and spool ID without label text, under Settings → Application logs.
 
 ## Version 1.2.0 — 2026-11-27
 
@@ -14,7 +22,7 @@ Out-of-area preview errors include a Move content to the center of tape width bu
 
 **Destination after sending:** The Print dialog offers two buttons: Print queue page or Stay on this page. The preference is remembered for the current user in that browser. Staying preserves the designer and selection, while a small five-second notification reports submission success, simulation completion, failure or cancellation. Submission success is not hardware-confirmed completion. Live status, cancellation and Next record remain available in the designer, including confirm-each-record mode. Status reconnection never resends print data.
 
-Install/upgrade using `CableLabelStudio-1.2.0-Setup.exe`, or the repaired in-app updater. The 1.1.1 HTTPS fix remains included. Users of the affected 1.1.0 package may manually upgrade directly to 1.2.0. Development additionally uses Node's built-in test runner for the print-dialog tests; the installed application does not require Node.
+Install/upgrade using `CableLabelStudio-1.2.1-Setup.exe`, or the repaired in-app updater. The 1.1.1 HTTPS fix remains included. Users of the affected 1.1.0 package may manually upgrade directly to 1.2.0. Development additionally uses Node's built-in test runner for the print-dialog tests; the installed application does not require Node.
 
 In per-record confirmation mode, use the inline Next record button or `Ctrl+Enter` inside the designer. After an in-app upgrade, reload the browser page once with `F5` to load the new interface.
 
@@ -23,13 +31,13 @@ In per-record confirmation mode, use the inline Next record button or `Ctrl+Ente
 
 The 1.1.0 Windows bundle omitted a certificate-policy PEM required by the build runtime. Creating the HTTPS context failed with `[Errno 2] No such file or directory` before contacting GitHub. Version 1.1.1 bundles that exact required policy; certificate and hostname verification remain enabled. Release checks now include a real GitHub HTTPS check from the frozen executable. Persistent error reports include the exception type, operation stage and technical traceback on the same update page.
 
-If the broken 1.1.0 updater cannot check releases, **download the current 1.2.0 installer manually once and run Upgrade**. Maintenance preserves user data. Subsequent releases can be checked/downloaded through the repaired updater. Printer configuration and user label files did not cause this error.
+If the broken 1.1.0 updater cannot check releases, **download the current 1.2.1 installer manually once and run Upgrade**. Maintenance preserves user data. Subsequent releases can be checked/downloaded through the repaired updater. Printer configuration and user label files did not cause this error.
 
 An offline Windows application with a browser interface for designing and submitting Brother PT-E550W labels. The local engine stores templates, files, uploads, accounts, rules and reports on this computer.
 
 ## Installation and maintenance
 
-Run `CableLabelStudio-1.2.0-Setup.exe`. Choose English, Persian or Arabic, select New installation and choose a dedicated installation folder. The wizard displays progress, SHA-256 verification and a saved operation log. Launch the desktop or Start menu shortcut. The default URL is `http://127.0.0.1:8765` and no login is required initially.
+Run `CableLabelStudio-1.2.1-Setup.exe`. Choose English, Persian or Arabic, select New installation and choose a dedicated installation folder. The wizard displays progress, SHA-256 verification and a saved operation log. Launch the desktop or Start menu shortcut. The default URL is `http://127.0.0.1:8765` and no login is required initially.
 
 The package targets Windows 10/11 x64 and bundles Python. The wizard uses Windows .NET Framework 4.7.2 or later. Installation is per Windows user; choosing a protected installation folder may require appropriate Windows permissions. The application binds only to loopback, not the LAN.
 

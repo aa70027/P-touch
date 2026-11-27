@@ -175,13 +175,17 @@ def raster_page(image, label, cut='full', first=True, last=True):
     # The renderer already samples the feed axis at 360 dpi in high mode.
     # Duplicating those samples again would incorrectly double the physical length.
     lines=image.width
+    # ESC i M auto-cut is the *between-label* full cutter. Ending a strip is
+    # separate: ESC i K's no-chain flag feeds/cuts after the final Control-Z.
+    # Do not switch on full-cut-each-label mode just to finish a half-cut strip.
+    auto_cut=cut=='full' and not last
     flags=(0x40 if high else 0) | (0x04 if cut=='half' else 0) | (0x08 if last and cut=='full' else 0)
     out=bytearray(b'\x00'*100+b'\x1b@' if first else b'')
     out.extend(b'\x1bia\x01')
     # Width checked by printer; media kind omitted to permit TZe/HGe compatible tape.
     out.extend(b'\x1biz'+bytes([0x84,0,round(label.width),0])+struct.pack('<I',lines)+bytes([0 if first else 1,0]))
-    out.extend(b'\x1biM'+bytes([0x40 if cut=='full' else 0]))
-    if label.model!='PT-P710BT':
+    out.extend(b'\x1biM'+bytes([0x40 if auto_cut else 0]))
+    if auto_cut and label.model!='PT-P710BT':
         out.extend(b'\x1biA\x01')
     out.extend(b'\x1biK'+bytes([flags]))
     out.extend(b'\x1bid'+struct.pack('<H',feed)+b'M\x02')
@@ -228,13 +232,13 @@ class Transport:
             self.sock.sendall(data)
         else:
             import win32print
-            win32print.StartPagePrinter(self.handle)
-            try:
-                sent=win32print.WritePrinter(self.handle,data)
-                if sent!=len(data):
-                    raise OSError('INCOMPLETE_WRITE')
-            finally:
-                win32print.EndPagePrinter(self.handle)
+            # Raster already contains FF / Control-Z page boundaries. Wrapping
+            # each label in a Windows page gives the print processor another
+            # opportunity to finish/feed/cut it, breaking the continuous strip.
+            # One RAW document carries the complete confirmed segment instead.
+            sent=win32print.WritePrinter(self.handle,data)
+            if sent!=len(data):
+                raise OSError('INCOMPLETE_WRITE')
 
     def __exit__(self,typ,value,tb):
         if self.sock:
