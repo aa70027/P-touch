@@ -19,7 +19,7 @@ using Microsoft.Win32;
 [assembly: AssemblyProduct("Cable Label Studio")]
 [assembly: AssemblyCompany("Amir Rahimi")]
 [assembly: AssemblyCopyright("Copyright 2026 Amir Rahimi - MIT License")]
-[assembly: AssemblyVersion("1.2.1.0")]
+[assembly: AssemblyVersion("1.3.0.0")]
 
 public class PackageManifest {
     public string product {get;set;}
@@ -135,7 +135,7 @@ public class Engine {
         PackageManifest old=Manifest(target);
         if(Directory.Exists(target) && Directory.EnumerateFileSystemEntries(target).Any() && old==null)throw new IOException("The destination contains unrelated files. Choose an empty folder.");
         if(mode=="uninstall"||mode=="repair")if(old==null)throw new IOException("No installation was found in this folder.");
-        Log("Cable Label Studio 1.2.1 · "+mode);Log("Destination: "+target);Log("Data is preserved in LocalAppData\\CableLabelStudio.");Progress(2);
+        Log("Cable Label Studio 1.3.0 · "+mode);Log("Destination: "+target);Log("Data is preserved in LocalAppData\\CableLabelStudio.");Progress(2);
         StopApp();
         if(mode=="uninstall"){
             int index=0;
@@ -226,7 +226,7 @@ public class Engine {
         }
     }
     void Register(){using(var key=Registry.CurrentUser.CreateSubKey(Program.RegPath)){
-        key.SetValue("DisplayName","Cable Label Studio");key.SetValue("DisplayVersion","1.2.1");key.SetValue("Publisher","Amir Rahimi");key.SetValue("URLInfoAbout","https://github.com/aa70027/P-touch");key.SetValue("InstallLocation",target);
+        key.SetValue("DisplayName","Cable Label Studio");key.SetValue("DisplayVersion","1.3.0");key.SetValue("Publisher","Amir Rahimi");key.SetValue("URLInfoAbout","https://github.com/aa70027/P-touch");key.SetValue("InstallLocation",target);
         key.SetValue("DisplayIcon",Path.Combine(target,Program.Exe));
         string setup=Program.Quote(Path.Combine(target,"CableLabelStudio-Setup.exe"));
         key.SetValue("UninstallString",setup+" /mode uninstall /dir "+Program.Quote(target));
@@ -297,7 +297,7 @@ public class Wizard:Form {
         var brand=new Label(){Text="CABLE LABEL\nSTUDIO",Location=new Point(28,38),Size=new Size(200,90),ForeColor=Color.White,Font=new Font("Segoe UI",22,FontStyle.Bold)};side.Controls.Add(brand);
         var caption=new Label(){Text="WINDOWS / OFFLINE\nBROTHER PT-E550W",Location=new Point(30,135),Size=new Size(190,60),ForeColor=Color.FromArgb(137,180,170),Font=new Font("Segoe UI",9)};side.Controls.Add(caption);
         steps=new Label(){Location=new Point(28,270),Size=new Size(190,170),ForeColor=Color.FromArgb(218,233,221),Font=new Font("Segoe UI",11)};side.Controls.Add(steps);
-        side.Controls.Add(new Label(){Text="VERSION 1.2.1 / MIT",Location=new Point(30,440),Size=new Size(180,30),ForeColor=Color.FromArgb(126,159,154),Font=new Font("Segoe UI",8)});
+        side.Controls.Add(new Label(){Text="VERSION 1.3.0 / MIT",Location=new Point(30,440),Size=new Size(180,30),ForeColor=Color.FromArgb(126,159,154),Font=new Font("Segoe UI",8)});
         side.Controls.Add(new Label(){Text="Amir Rahimi\nسازنده / Creator / المطوّر\nرایگان / Free / مجاني · MIT",Location=new Point(28,480),Size=new Size(205,67),ForeColor=Color.FromArgb(218,233,221),Font=new Font("Segoe UI",9)});
         var projectLink=new LinkLabel(){Text="GitHub · P-touch ↗",Location=new Point(28,560),Size=new Size(200,30),LinkColor=Color.FromArgb(232,184,106)};
         projectLink.LinkClicked+=(o,e)=>Process.Start("https://github.com/aa70027/P-touch");side.Controls.Add(projectLink);

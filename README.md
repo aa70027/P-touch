@@ -20,10 +20,10 @@ Version **1.2.0** adds persistent per-file cut policies, editable cuts in Print,
 
 ## Download / دانلود / التنزيل
 
-- [Windows x64 installer](https://github.com/aa70027/P-touch/releases/download/v1.2.1/CableLabelStudio-1.2.1-Setup.exe)
-- [Portable ZIP](https://github.com/aa70027/P-touch/releases/download/v1.2.1/CableLabelStudio-1.2.1-Portable.zip)
-- [Editable source](https://github.com/aa70027/P-touch/releases/download/v1.2.1/CableLabelStudio-1.2.1-Source.zip)
-- [SHA-256 checksums](https://github.com/aa70027/P-touch/releases/download/v1.2.1/SHA256SUMS.txt)
+- [Windows x64 installer](https://github.com/aa70027/P-touch/releases/download/v1.3.0/CableLabelStudio-1.3.0-Setup.exe)
+- [Portable ZIP](https://github.com/aa70027/P-touch/releases/download/v1.3.0/CableLabelStudio-1.3.0-Portable.zip)
+- [Editable source](https://github.com/aa70027/P-touch/releases/download/v1.3.0/CableLabelStudio-1.3.0-Source.zip)
+- [SHA-256 checksums](https://github.com/aa70027/P-touch/releases/download/v1.3.0/SHA256SUMS.txt)
 
 Install the package, choose فارسی / English / العربية on the first screen and launch Cable Label Studio. The browser opens a loopback-only local app. No login is required initially; authentication can be enabled in Settings.
 
@@ -45,4 +45,4 @@ Windows x64, Python 3.12. Create a virtual environment, install requirements-dev
 
 User data: `%LOCALAPPDATA%\CableLabelStudio`. Installer maintenance preserves it. Linked Excel files remain external and require a separate backup. The executable is unsigned. Brother driver/software licenses are separate from this project's MIT license.
 
-Development source includes manual status editing in original linked Excel workbooks. Standalone PT-E550W template conversion/transfer and device-to-Excel status readback remain pending; the public 1.2.1 installer does not contain this development feature. See NEXT_UPDATE.md.
+Version **1.3.0** adds original XLSX/XLSM status editing, reviewed CSV exchange with conflict detection, experimental static-image LBX packages and handoff to official Brother transfer tools. Automatic retrieval of edited device database cells is unsupported; proprietary printer backups are not CSV imports.

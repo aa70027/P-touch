@@ -1,5 +1,7 @@
-"""Smoke-test release 1.2.1 features using only the frozen application server."""
+"""Smoke-test release 1.3.0 features using only the frozen application server."""
 import io
+import csv
+import zipfile
 import json
 from pathlib import Path
 import socket
@@ -16,7 +18,7 @@ from labelstudio.models import Document,Label,Element,CutSettings
 case=root/'.installer-qa'/('package-update-'+uuid.uuid4().hex[:8]);case.mkdir(parents=True)
 data=case/'data';source=case/'live.xlsx'
 book=Workbook();book.active.title='First';book.active.append(['Name','_sheet','_sheet_value']);book.active.append(['OLD','keep','also-keep'])
-tab=book.create_sheet('Second');tab.append(['Name']);tab.append(['SECOND']);book.save(source)
+tab=book.create_sheet('Second');tab.append(['Name']);tab.append(['SECOND']);tab=book.create_sheet('Status');tab.append(['RecordID','PrintStatus','Text']);tab.append(['R001','PENDING','First']);tab.append(['R002','PENDING','Second']);book.save(source);book.close()
 store=Store(data);item=store.save_resource(store.user('local'),'source','live.xlsx',{'linked_path':str(source),'live':True},'private')
 with socket.socket() as sock:sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
 app=root/'dist'/'CableLabelStudio'/'CableLabelStudio.exe'
@@ -32,7 +34,7 @@ try:
         except Exception:time.sleep(.2)
     else:raise AssertionError('Frozen app did not start')
     headers['X-CSRF-Token']=boot['csrf']
-    assert boot['version']=='1.2.1' and boot['creator']=='Amir Rahimi' and boot['license']=='MIT'
+    assert boot['version']=='1.3.0' and boot['creator']=='Amir Rahimi' and boot['license']=='MIT'
     checks.append('frozen version, creator, project and MIT metadata')
     rows=api('/api/data/read',{'source':item['id'],'sheets':['First','Second']})['records']
     assert len(rows)==2 and rows[0]['_sheet']=='First' and rows[0]['_sheet_value']=='also-keep' and rows[0]['_sheet_value_2']=='keep'
@@ -99,6 +101,42 @@ try:
         assert raw[raw.index(b'\x1biK')+3]==(8 if number==5 else 4)
         assert raw[-1]==(0x1a if number==5 else 0x0c)
     checks.append('frozen five-copy batch has four half-cut chained pages and only one final full-cut command')
+    status_url='/api/sources/'+item['id']+'/status'
+    selection=dict(sheets=['Status'],key_column='RecordID',status_column='PrintStatus')
+    before=source.read_bytes();snapshot=api(status_url+'/inspect',selection)
+    edited=api(status_url+'/apply',selection|dict(fingerprint=snapshot['fingerprint'],updates=[dict(sheet='Status',key='R001',expected_status='PENDING',status='OK')]))
+    assert edited['changed']==1 and edited['device']['state']=='pending_transfer'
+    history=api(status_url+'/history')
+    with urllib.request.urlopen(f'http://127.0.0.1:{port}'+history[0]['backup_url']) as response:assert response.read()==before
+    checks.append('frozen original Excel status write creates an exact owner backup')
+    exchange=api(status_url+'/export',selection)
+    with urllib.request.urlopen(f'http://127.0.0.1:{port}'+exchange['download_url']) as response:csv_rows=list(csv.DictReader(io.StringIO(response.read().decode('utf-8-sig'))))
+    csv_rows[1]['PrintStatus']='OK';output=io.StringIO(newline='')
+    writer=csv.DictWriter(output,fieldnames=['ExchangeID','Sheet','RecordID','PrintStatus']);writer.writeheader();writer.writerows(csv_rows)
+    boundary='StudioSmoke'+uuid.uuid4().hex
+    upload=(f'--{boundary}\r\nContent-Disposition: form-data; name="file"; filename="status.csv"\r\nContent-Type: text/csv\r\n\r\n'.encode()+output.getvalue().encode()+f'\r\n--{boundary}--\r\n'.encode())
+    request=urllib.request.Request(f'http://127.0.0.1:{port}'+status_url+'/import-preview',data=upload,headers=headers|{'Content-Type':'multipart/form-data; boundary='+boundary})
+    before=source.read_bytes()
+    with urllib.request.urlopen(request,timeout=30) as response:plan=json.load(response)
+    assert not plan['automatic_device_readback'] and len(plan['updates'])==1 and not plan['conflicts'] and source.read_bytes()==before
+    applied=api('/api/status/imports/'+plan['id']+'/apply',{})
+    assert applied['changed']==1 and api('/api/status/imports/'+plan['id']+'/apply',{})['event']==applied['event']
+    checks.append('frozen CSV exchange requires review and explicit idempotent application')
+    native_doc=Document(pages=[Label(elements=[Element(text='{Name}',y=5)])]).model_dump()
+    bundle=api('/api/standalone/prepare',{'document':native_doc,'records':[{'Name':'One'},{'Name':'Two'}]})
+    with urllib.request.urlopen(f'http://127.0.0.1:{port}'+bundle['download_url']) as response:bundle_raw=response.read()
+    with zipfile.ZipFile(io.BytesIO(bundle_raw)) as archive:
+        manifest=json.loads(archive.read('manifest.json'))
+        assert manifest['device_state']=='not_transferred' and manifest['hardware_tested'] is False and len(manifest['templates'])==2
+        assert all('README.'+lang+'.txt' in archive.namelist() for lang in ('fa','en','ar'))
+        assert 'labels.csv' in archive.namelist()
+        with zipfile.ZipFile(io.BytesIO(archive.read('label-001.lbx'))) as label:
+            assert set(label.namelist())=={'label.xml','prop.xml','Object0.bmp'}
+            assert int.from_bytes(label.read('Object0.bmp')[28:30],'little')==32
+    checks.append('frozen experimental native package contains static LBX images, row mapping and three guides')
+    tools=api('/api/standalone/tools')
+    assert all(isinstance(tools[k],bool) for k in ('editor','transfer','network')),tools
+    checks.append('frozen Brother tool detection runs without launching or transferring')
     subprocess.run([str(app),'--data-dir',str(data),'--stop'],creationflags=subprocess.CREATE_NO_WINDOW,timeout=20)
     process.wait(timeout=20)
     process=subprocess.Popen([str(app),'--data-dir',str(data),'--no-browser','--port',str(port)],creationflags=subprocess.CREATE_NO_WINDOW)
@@ -112,6 +150,10 @@ try:
     restored=next(r for r in current if r['id']==saved['id'])
     assert restored['payload']['cut_settings']==none and restored['payload']['pages'][0]['persian_digits']
     checks.append('file-specific cuts and Persian digits survive a real process restart')
+    workbook=load_workbook(source);assert workbook['Status']['B2'].value=='OK' and workbook['Status']['B3'].value=='OK';workbook.close()
+    assert len(api(status_url+'/history'))==2 and any(r['id']==bundle['id'] for r in api('/api/standalone'))
+    checks.append('original statuses, backups and prepared native bundles survive a real process restart')
+
 finally:
     subprocess.run([str(app),'--data-dir',str(data),'--stop'],creationflags=subprocess.CREATE_NO_WINDOW,timeout=20)
     process.wait(timeout=20)

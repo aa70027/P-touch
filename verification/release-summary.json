@@ -1,12 +1,12 @@
 {
-  "version": "1.2.1",
-  "date": "2026-11-27",
-  "unit_tests_passed": 129,
-  "node_ui_logic_tests_passed": 12,
+  "version": "1.3.0",
+  "date": "2026-11-28",
+  "unit_tests_passed": 161,
+  "node_ui_logic_tests_passed": 26,
   "package_checks_passed": 17,
   "windows_integration_checks_passed": 3,
   "native_update_handoff_checks_passed": 4,
-  "frozen_update_feature_checks_passed": 11,
+  "frozen_update_feature_checks_passed": 16,
   "frozen_github_https_verified": true,
   "browser_visual_inspection": false,
   "physical_printer_tested": false,
@@ -18,5 +18,11 @@
   "final_cut_separate_from_per_label_autocut": true,
   "reported_physical_transport": "wifi",
   "reported_physical_cut_issue_resolved": false,
-  "physical_note": "The user reported extra full cuts on Wi-Fi. Shared encoder and USB spool corrections are software-tested; physical resolution remains unverified."
+  "physical_note": "The user reported extra full cuts on Wi-Fi. Shared encoder and USB spool corrections are software-tested; physical resolution remains unverified.",
+  "original_excel_status_verified": true,
+  "csv_three_way_conflict_checks": true,
+  "native_static_lbx_export_verified": true,
+  "native_editor_acceptance_verified": false,
+  "automatic_device_readback_supported": false,
+  "actual_device_transfer_verified": false
 }

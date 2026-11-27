@@ -1,12 +1,18 @@
-# Cable Label Studio — 1.2.1
+# Cable Label Studio — 1.3.0
 
-## Development: original Excel print status
+## Version 1.3.0 — original Excel status and standalone preparation
 
-This feature is in the development source and is not included in the public 1.2.1 installer. Open Data sources → Excel print status and select an owned original XLSX/XLSM file linked through the Windows picker. Uploaded copies cannot update the original. Provide a fixed, unique row ID within each sheet and a plain-text status column, for example `RecordID` and `PrintStatus`. Select sheets and columns, read the rows, mark selected IDs `OK` or enter a value, then save in the original Excel file.
+**Original-file status:** Open Data sources → Excel print status and select an owned original XLSX/XLSM linked through Windows. Uploaded copies cannot update the original. Provide a fixed unique ID within each sheet and a plain-text status column, such as `RecordID` and `PrintStatus`. Select sheets and columns, read the rows, mark selected IDs OK or enter a value, then save in the original workbook. Close the file in Excel before writing.
 
-Close the workbook in Excel before writing. Only status cells are changed; a full original backup and an owner-only change history/download link are retained. Formula cells, VBA bytes, drawings and other opaque package parts are preserved. Protected sheets, digitally signed workbooks, duplicate/missing/formula IDs and formula status columns are rejected. A workbook changed since inspection rejects the whole update and requires refresh/review. Legacy XLS needs conversion in Excel. The application does not calculate dependent formulas; Excel recalculates on opening.
+Only status cells change. An exact prior-file backup, owner-only history and backup download are retained. Formulas, VBA bytes, drawings and other package parts are preserved. Protected sheets, signed workbooks, missing/duplicate/formula IDs and formula status columns are rejected. Changes after inspection require refresh/review. Convert legacy XLS in Excel. Excel recalculates dependent formulas when opening the workbook.
 
-Statuses are manual acknowledgements. A print submission or simulation never automatically sets `OK`. The UI explicitly shows the printer as not synchronized. Native PT-E550W template transfer and retrieval of edited device cells are not implemented/verified. A Brother backup is not an editable Excel/CSV export. Continuing the device path requires official Brother tools and access to the printer or genuine before/after backups of a one-cell edit. `examples/device-status-sample.csv` contains two synthetic test records; it is not a real device backup.
+**CSV status exchange:** After reading statuses, export CSV with `ExchangeID`, `Sheet`, `RecordID`, `PrintStatus`. Edit only the final column and preserve UTF-8 and identifiers. Import a genuine readable updated CSV or a user-edited file. A paginated preview lists updates/conflicts; only explicit Apply writes the original Excel. Concurrent status changes, changed print-data values, removed/unknown rows and a relinked source reject the affected import. Reordered rows match by stable ID. One exchange supports 65,000 CSV records, at most 10,000 changed rows and a 10 MB file. Applying the same plan again is idempotent.
+
+**Standalone printing — experimental image LBX export:** Open Standalone printing in the designer or Data sources, choose the record range and prepare the package. Each record/page becomes an independent static image LBX of the actual rendered design, preserving shaping, fonts, images, flags and evaluated rules. Its text is not editable on the device. CSV data is separate and not dynamically bound to LBX images. `labels.csv` and `manifest.json` map records/pages to unique template files/titles. Packages contain LBX, PNG, records.csv, the original design and three-language instructions. Limits: 99 templates, image dimensions up to 2048 pixels, 64 MB total LBX data. Actual P-touch Editor/device acceptance remains unverified; no hardware certification is claimed.
+
+Open an LBX in **P-touch Editor** and verify PT-E550W, tape dimensions and preview. Use `File → Transfer Template` to register it in **P-touch Transfer Manager**. USB transfer uses the selected printer and free slots in Transfer Manager. For Wi-Fi, save a template BLF, then use **BRAdmin Professional**, `Control → Load Firmware (Manual) → TFTP PUT`, for that template BLF; enter the printer admin password only in the official tool. Application buttons open discovered installed tools. Prepared packages and opened tools are not device transfer acknowledgements. Use `File → Transferred Templates` on the printer and choose copies/cutting there. The application sends no firmware commands or unverified raw transfer packets.
+
+**Limits:** Status changes are manual acknowledgements; submission, simulation or package preparation never automatically marks OK. Proprietary Brother backups are not editable CSV and are not imported. Automatic retrieval of edited PT-E550W cells into the application/Excel is unsupported. The return workflow in this release is readable CSV import with review. `examples/device-status-sample.csv` is synthetic test data, not a device backup. Reload the browser once with Ctrl+F5 after upgrading.
 
 ## Cut-command and USB transmission patch 1.2.1 — 2026-11-27
 
@@ -30,7 +36,7 @@ Out-of-area preview errors include a Move content to the center of tape width bu
 
 **Destination after sending:** The Print dialog offers two buttons: Print queue page or Stay on this page. The preference is remembered for the current user in that browser. Staying preserves the designer and selection, while a small five-second notification reports submission success, simulation completion, failure or cancellation. Submission success is not hardware-confirmed completion. Live status, cancellation and Next record remain available in the designer, including confirm-each-record mode. Status reconnection never resends print data.
 
-Install/upgrade using `CableLabelStudio-1.2.1-Setup.exe`, or the repaired in-app updater. The 1.1.1 HTTPS fix remains included. Users of the affected 1.1.0 package may manually upgrade directly to 1.2.0. Development additionally uses Node's built-in test runner for the print-dialog tests; the installed application does not require Node.
+Install/upgrade using `CableLabelStudio-1.3.0-Setup.exe`, or the repaired in-app updater. The 1.1.1 HTTPS fix remains included. Users of the affected 1.1.0 package may manually upgrade directly to 1.2.0. Development additionally uses Node's built-in test runner for the print-dialog tests; the installed application does not require Node.
 
 In per-record confirmation mode, use the inline Next record button or `Ctrl+Enter` inside the designer. After an in-app upgrade, reload the browser page once with `F5` to load the new interface.
 
@@ -39,13 +45,13 @@ In per-record confirmation mode, use the inline Next record button or `Ctrl+Ente
 
 The 1.1.0 Windows bundle omitted a certificate-policy PEM required by the build runtime. Creating the HTTPS context failed with `[Errno 2] No such file or directory` before contacting GitHub. Version 1.1.1 bundles that exact required policy; certificate and hostname verification remain enabled. Release checks now include a real GitHub HTTPS check from the frozen executable. Persistent error reports include the exception type, operation stage and technical traceback on the same update page.
 
-If the broken 1.1.0 updater cannot check releases, **download the current 1.2.1 installer manually once and run Upgrade**. Maintenance preserves user data. Subsequent releases can be checked/downloaded through the repaired updater. Printer configuration and user label files did not cause this error.
+If the broken 1.1.0 updater cannot check releases, **download the current 1.3.0 installer manually once and run Upgrade**. Maintenance preserves user data. Subsequent releases can be checked/downloaded through the repaired updater. Printer configuration and user label files did not cause this error.
 
 An offline Windows application with a browser interface for designing and submitting Brother PT-E550W labels. The local engine stores templates, files, uploads, accounts, rules and reports on this computer.
 
 ## Installation and maintenance
 
-Run `CableLabelStudio-1.2.1-Setup.exe`. Choose English, Persian or Arabic, select New installation and choose a dedicated installation folder. The wizard displays progress, SHA-256 verification and a saved operation log. Launch the desktop or Start menu shortcut. The default URL is `http://127.0.0.1:8765` and no login is required initially.
+Run `CableLabelStudio-1.3.0-Setup.exe`. Choose English, Persian or Arabic, select New installation and choose a dedicated installation folder. The wizard displays progress, SHA-256 verification and a saved operation log. Launch the desktop or Start menu shortcut. The default URL is `http://127.0.0.1:8765` and no login is required initially.
 
 The package targets Windows 10/11 x64 and bundles Python. The wizard uses Windows .NET Framework 4.7.2 or later. Installation is per Windows user; choosing a protected installation folder may require appropriate Windows permissions. The application binds only to loopback, not the LAN.
 

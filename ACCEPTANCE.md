@@ -92,3 +92,7 @@ The shared encoder now uses no-chain feed/cut for a final full boundary without 
 ## Development: original Excel status
 
 Source-only implementation: status Routes/API and UI manage manual acknowledgements in an owned original linked XLSX/XLSM. Tests cover exact backups, per-sheet identity, opaque-part preservation (including VBA bytes), stale-read rejection, formula/protected-sheet safeguards, real Windows sharing locks, literal values and source/backup access control. Node tests cover explicit saves, account isolation, selected sheet/key identity and no automatic OK. Browser visual inspection remains unavailable. Standalone native template conversion/transfer and device database readback are not implemented or hardware-verified. Do not equate the test CSV or a prepared source file with a real device backup or transfer.
+
+## Release 1.3.0
+
+Original Excel status editing and CSV exchange are released software paths. Regressions cover three-way status conflicts, changed row content, stable-ID reordering, stale-preview rejection, idempotent application, malformed/foreign CSV and private exports/plans/backups. Native package checks validate ZIP/XML structure, 32-bit embedded BMP, exact preservation of rendered ink in standard/high quality, per-record mapping, bounded counts, private access and explicit tool-handoff states. These are format/software tests, not acceptance in the real P-touch Editor or device. LBX export is experimental. Automatic device database readback remains unsupported; proprietary backups are not parsed.

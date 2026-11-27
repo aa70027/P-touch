@@ -72,3 +72,11 @@ Software tests distinguish queued/submitted/simulated results from physical prin
 - [ ] Read edited device database values, associate them with stable IDs, preview conflicts and synchronize the original Excel.
 - [ ] Verify software-to-device and device-to-software changes with real PT-E550W data. Current printer is unreachable from the development environment and Brother transfer tools are absent.
 - [ ] Complete native/device integration before publishing a release claiming both directions are supported.
+
+## Version 1.3.0 — 2026-11-28
+
+- [x] Release original Excel status editing and reviewed CSV exchange with baseline identity, concurrent status/data conflicts, stable-ID row reorder handling and idempotent application.
+- [x] Experimental static-image LBX export, one template per record/page, rendered PNGs, raw data CSV, unique template mapping and three-language guides.
+- [x] Discover/open installed official P-touch Editor, Transfer Manager and BRAdmin tools; explicit USB/Wi-Fi transfer steps and no false transfer acknowledgements.
+- [ ] Actual LBX acceptance in P-touch Editor and PT-E550W, free-slot/memory checks and physical output.
+- [ ] Automatic edited-cell retrieval from the printer. This remains unsupported; CSV import is the supported file-mediated return workflow and does not parse proprietary backups.

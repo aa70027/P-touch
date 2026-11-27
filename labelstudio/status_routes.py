@@ -1,11 +1,15 @@
 """Authenticated status management for the user's linked, original Excel file."""
 import json
+import csv
+import hashlib
+import io
+import os
 from pathlib import Path
 import time
 import uuid
 
-from fastapi import Depends
-from fastapi.responses import FileResponse
+from fastapi import Depends,UploadFile,File
+from fastapi.responses import FileResponse,Response
 from pydantic import BaseModel,Field
 
 from .excel_status import apply_status,inspect_status,status_options
@@ -42,6 +46,92 @@ def register_status_routes(app,store,current_user):
         if source['kind']!='source':raise ValueError('INVALID_SOURCE')
         if not source['payload'].get('linked_path'):raise ValueError('STATUS_REQUIRES_ORIGINAL_LINKED_EXCEL')
         return source,Path(source['payload']['linked_path'])
+
+    def binding(path):return hashlib.sha256(os.path.normcase(str(path.resolve())).encode('utf-8')).hexdigest()
+
+    def owned_resource(ident,kind,user):
+        resource=store.resource(ident,user)
+        if resource['owner']!=user['id'] or resource['kind']!=kind:raise PermissionError('OWNER_ONLY')
+        return resource
+
+    @app.post('/api/sources/{ident}/status/export')
+    def export_status(ident:str,selection:StatusSelection,user=Depends(current_user)):
+        source,path=original(ident,user)
+        snapshot=inspect_status(path,**selection.model_dump())
+        if len(snapshot['records'])>65000:raise ValueError('STATUS_EXPORT_MAX_65000')
+        exported=store.save_resource(user,'status_exchange',source['name'],{'source':ident,'binding':binding(path),
+                       'selection':selection.model_dump(),'snapshot':snapshot},'private')
+        return {'id':exported['id'],'rows':len(snapshot['records']),'download_url':'/api/status/exchanges/'+exported['id']+'/download',
+                'device_state':'not_transferred'}
+
+    @app.get('/api/status/exchanges/{exchange}/download')
+    def exchange_file(exchange:str,user=Depends(current_user)):
+        resource=owned_resource(exchange,'status_exchange',user)
+        output=io.StringIO(newline='');writer=csv.writer(output)
+        writer.writerow(['ExchangeID','Sheet','RecordID','PrintStatus'])
+        for row in resource['payload']['snapshot']['records']:writer.writerow([exchange,row['sheet'],row['key'],row['status']])
+        return Response(('\ufeff'+output.getvalue()).encode('utf-8'),media_type='text/csv',
+                        headers={'Content-Disposition':'attachment; filename="print-status.csv"'})
+
+    @app.post('/api/sources/{ident}/status/import-preview')
+    def import_preview(ident:str,file:UploadFile=File(...),user=Depends(current_user)):
+        source,path=original(ident,user)
+        if not file.filename or not file.filename.lower().endswith('.csv'):raise ValueError('STATUS_IMPORT_READABLE_CSV_ONLY')
+        raw=file.file.read(10*1024*1024+1)
+        if len(raw)>10*1024*1024:raise ValueError('STATUS_IMPORT_MAX_10MB')
+        try:reader=csv.DictReader(io.StringIO(raw.decode('utf-8-sig'),newline=''))
+        except UnicodeDecodeError:raise ValueError('STATUS_CSV_UTF8_REQUIRED')
+        try:
+            headers=reader.fieldnames or []
+            if len(headers)!=4 or set(headers)!={'ExchangeID','Sheet','RecordID','PrintStatus'}:raise ValueError('STATUS_IMPORT_HEADERS_INVALID')
+            incoming=[];seen=set();exchange=None
+            for row in reader:
+                if None in row or any(v is None for v in row.values()):raise ValueError('STATUS_IMPORT_HEADERS_INVALID')
+                if not row['ExchangeID'] or exchange is not None and row['ExchangeID']!=exchange:raise ValueError('STATUS_EXCHANGE_ID_MISMATCH')
+                exchange=row['ExchangeID'];identity=(row['Sheet'],row['RecordID'])
+                if identity in seen:raise ValueError('STATUS_DUPLICATE_UPDATE')
+                if not row['RecordID'] or len(row['RecordID'])>8000 or len(row['PrintStatus'])>100:raise ValueError('STATUS_VALUE_INVALID')
+                if any(ord(c)<32 and c not in '\n\t\r' for c in row['PrintStatus']):raise ValueError('STATUS_VALUE_INVALID')
+                seen.add(identity);incoming.append(row)
+                if len(incoming)>65000:raise ValueError('STATUS_EXPORT_MAX_65000')
+        except csv.Error:raise ValueError('STATUS_IMPORT_HEADERS_INVALID')
+        if not incoming:raise ValueError('NO_RECORDS')
+        exported=owned_resource(exchange,'status_exchange',user)['payload']
+        if exported['source']!=ident or exported['binding']!=binding(path):raise ValueError('STATUS_SOURCE_RELINKED')
+        selection=exported['selection'];current=inspect_status(path,**selection)
+        baseline={(r['sheet'],r['key']):r for r in exported['snapshot']['records']}
+        latest={(r['sheet'],r['key']):r for r in current['records']}
+        updates=[];conflicts=[];unchanged=0
+        for row in incoming:
+            identity=(row['Sheet'],row['RecordID']);before=baseline.get(identity);now=latest.get(identity);after=row['PrintStatus'];reason=None
+            if before is None:reason='unknown_export_row'
+            elif now is None:reason='row_removed'
+            elif after==before['status'] or after==now['status']:unchanged+=1;continue
+            elif now['data_fingerprint']!=before['data_fingerprint']:reason='row_data_changed'
+            elif now['status']!=before['status']:reason='both_changed'
+            if reason:conflicts.append(dict(sheet=identity[0],key=identity[1],reason=reason,baseline=before['status'] if before else None,current=now['status'] if now else None,incoming=after))
+            else:updates.append(dict(sheet=identity[0],key=identity[1],expected_status=now['status'],status=after))
+        if len(updates)>10000:raise ValueError('STATUS_SELECT_1_TO_10000_ROWS')
+        plan=store.save_resource(user,'status_import',source['name'],dict(source=ident,exchange=exchange,selection=selection,
+                    fingerprint=current['fingerprint'],updates=updates,conflicts=conflicts,unchanged=unchanged,state='review',
+                    input_sha256=hashlib.sha256(raw).hexdigest()),'private')
+        return {'id':plan['id'],'selection':selection,'updates':updates,'conflicts':conflicts,'unchanged':unchanged,
+                'device_state':'unverified_csv','automatic_device_readback':False}
+
+    @app.post('/api/status/imports/{plan}/apply')
+    def apply_import(plan:str,user=Depends(current_user)):
+        with app.state.operations:
+            resource=owned_resource(plan,'status_import',user);payload=resource['payload']
+            original(payload['source'],user)
+            if payload['state']=='applied':return payload['result']
+            if payload['conflicts']:raise ValueError('STATUS_IMPORT_HAS_CONFLICTS')
+            if payload['updates']:
+                result=apply(payload['source'],StatusApply(**payload['selection'],fingerprint=payload['fingerprint'],updates=payload['updates']),user)
+            else:result={'changed':0,'event':None,'device':{'state':'unknown','readback_supported':False}}
+            payload=payload|{'state':'applied','result':result}
+            store.save_resource(user,'status_import',resource['name'],payload,'private',plan)
+            store.audit(user['id'],'excel.status.import_csv',plan)
+            return result
 
     @app.get('/api/sources/{ident}/status/options')
     def options(ident:str,user=Depends(current_user)):

@@ -13,3 +13,5 @@ For 1.2.0 and later, preserve per-document cut_settings=None inheritance and sna
 For 1.2.1 and later, do not wrap individual native Raster labels in Windows StartPagePrinter/EndPagePrinter calls. The Raster stream owns its FF/Control-Z boundaries; one continuous or confirmed-record segment uses one RAW document. Keep five-copy USB/TCP stream regression and short-write abort coverage. A software trace cannot prove physical cutter behavior or identify the user's fault without device evidence.
 
 Keep final-strip no-chain feed/cut separate from per-label auto-full-cut; ESC i A cut-each-one belongs only to explicit intermediate full cuts. Verify both USB and TCP five-copy streams and preserve no-cut and intermediate full-cut behavior.
+
+For 1.3.0 and later, preserve original-workbook edit guards and CSV three-way conflict checks. Native LBX output is experimental static images, not a dynamic database template. Never report a prepared package or opened Brother tool as transferred, and never report file-mediated CSV import as automatic printer database readback. Keep all three Node behavior suites and frozen status/native package smoke tests.

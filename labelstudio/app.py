@@ -646,6 +646,9 @@ def create_app(data_dir=None):
         if not name:raise KeyError('SOFTWARE_NOT_READY')
         return FileResponse(updater.root/Path(name).name,filename=Path(name).name)
 
+    from .standalone import register_standalone_routes
+    register_standalone_routes(app,store,current_user,assets_for,source_data)
+
     app.mount('/static' ,StaticFiles(directory=ROOT/'web'),name='static')
 
     @app.get('/')

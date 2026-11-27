@@ -51,3 +51,28 @@ def windows_settings():
 def driver_preferences(printer):
     # Arguments are passed directly, never evaluated by a shell.
     subprocess.Popen(['rundll32.exe','printui.dll,PrintUIEntry','/e','/n',printer])
+
+
+def brother_tools():
+    import os
+    names={'editor':['ptedit50.exe','ptedit51.exe','ptedit52.exe','ptedit53.exe','ptedit54.exe','ptedit60.exe'],
+           'transfer':['PtTrMgr.exe'],'network':['BRAdmin.exe','BRAdminPro4.exe','BRAdmin4.exe']}
+    result={key:None for key in names}
+    for variable in ('ProgramFiles','ProgramFiles(x86)'):
+        parent=Path(os.environ.get(variable,''))/'Brother'
+        if not parent.is_dir():continue
+        for key,executables in names.items():
+            if result[key]:continue
+            for executable in executables:
+                candidates=list(parent.glob('*/'+executable))+list(parent.glob('*/*/'+executable))
+                if candidates:result[key]=candidates[0];break
+    return result
+
+
+def open_brother_tool(tool,file=None):
+    if tool not in ('editor','transfer','network'):raise ValueError('UNKNOWN_BROTHER_TOOL')
+    target=brother_tools()[tool]
+    if not target:raise ValueError('BROTHER_TOOL_NOT_INSTALLED')
+    arguments=[str(target)]+([str(file)] if file is not None else [])
+    # Only discovered installed Brother executables and app-owned LBX files.
+    subprocess.Popen(arguments)

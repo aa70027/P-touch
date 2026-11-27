@@ -8,6 +8,7 @@ import contextlib
 from functools import wraps
 import hashlib
 import io
+import json
 import os
 from pathlib import Path
 import posixpath
@@ -121,7 +122,9 @@ def sheet_rows(document,strings,key_column,status_column,sheet):
         if key in keys:raise ValueError('STATUS_ROW_KEY_NOT_UNIQUE')
         keys.add(key)
         if status_cell is not None and nodes(status_cell,'f'):raise ValueError('STATUS_COLUMN_CONTAINS_FORMULA')
-        records.append(dict(sheet=sheet,key=key,status=value(status_cell,strings) if status_cell is not None else '',
+        content=sorted((col,value(cell,strings)) for col,cell in cells.items() if col!=names[status_column] and value(cell,strings)!='')
+        content_hash=digest(json.dumps(content,ensure_ascii=False,separators=(',',':')).encode('utf-8'))
+        records.append(dict(sheet=sheet,key=key,status=value(status_cell,strings) if status_cell is not None else '',data_fingerprint=content_hash,
                             row=int(row.getAttribute('r')),reference=names[status_column]+row.getAttribute('r')))
         if len(records)>100000:raise ValueError('TOO_MANY_ROWS')
     return records
@@ -228,10 +231,11 @@ def apply_status(path,sheets,key_column,status_column,fingerprint,updates,backup
         original_identity=os.fstat(original.fileno())
         archive,workbook,targets,strings=load(raw)
         try:
-            documents={};records={}
+            documents={};records={};row_elements={}
             for sheet in selected:
                 if sheet not in targets:raise ValueError('SHEET_NOT_FOUND')
                 doc=xml(archive.read(targets[sheet]));documents[sheet]=doc
+                row_elements[sheet]={r.getAttribute('r'):r for r in doc.getElementsByTagNameNS(NS,'row')}
                 if doc.getElementsByTagNameNS(NS,'sheetProtection'):raise ValueError('STATUS_SHEET_PROTECTED')
                 for row in sheet_rows(doc,strings,key_column,status_column,sheet):records[(sheet,row['key'])]=row
             changes=[];seen=set()
@@ -247,7 +251,7 @@ def apply_status(path,sheets,key_column,status_column,fingerprint,updates,backup
                     raise ValueError('STATUS_VALUE_INVALID')
                 if new_value==current['status']:continue
                 doc=documents[identity[0]]
-                row=next(r for r in doc.getElementsByTagNameNS(NS,'row') if r.getAttribute('r')==str(current['row']))
+                row=row_elements[identity[0]][str(current['row'])]
                 target=next((c for c in nodes(row,'c') if c.getAttribute('r')==current['reference']),None)
                 if target is None:
                     prefix=row.prefix+':' if row.prefix else '';target=doc.createElementNS(NS,prefix+'c');target.setAttribute('r',current['reference'])
